@@ -5,7 +5,21 @@ import { useGetPlayerCharacters, useGetAchievements } from "@workspace/api-clien
 import { auth } from "@/lib/auth";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/Button";
-import { Plus, Shield, ScrollText, Sparkles, Trophy, Scroll, Trash2, Loader2 } from "lucide-react";
+import { Plus, Shield, ScrollText, Sparkles, Trophy, Scroll, Trash2, Loader2, ChevronDown, ChevronUp, Swords } from "lucide-react";
+
+const ATTR_LABELS: Record<string, { short: string; color: string }> = {
+  str: { short: "STR", color: "text-red-400" },
+  dex: { short: "DEX", color: "text-green-400" },
+  con: { short: "CON", color: "text-orange-400" },
+  int: { short: "INT", color: "text-blue-400" },
+  wis: { short: "WIS", color: "text-purple-400" },
+  cha: { short: "CHA", color: "text-pink-400" },
+};
+
+function modifier(score: number) {
+  const mod = Math.floor((score - 10) / 2);
+  return mod >= 0 ? `+${mod}` : `${mod}`;
+}
 
 function CharacterAchievements({ characterId }: { characterId: number }) {
   const { data: achievements } = useGetAchievements(characterId, { query: { enabled: !!characterId } });
@@ -30,6 +44,7 @@ export default function Dashboard() {
   const user = auth.getUser();
   const [, setLocation] = useLocation();
   const [deletingCharId, setDeletingCharId] = useState<number | null>(null);
+  const [expandedStatsId, setExpandedStatsId] = useState<number | null>(null);
 
   useEffect(() => {
     if (user?.role === "admin") {
@@ -143,6 +158,38 @@ export default function Dashboard() {
                         <span className="text-primary">{char.xp}</span>
                       </div>
                     </div>
+                    {/* Ability Scores toggle */}
+                    {(char as any).attributes && (
+                      <div className="mt-3">
+                        <button
+                          onClick={() => setExpandedStatsId(expandedStatsId === char.id ? null : char.id)}
+                          className="w-full flex items-center justify-between text-xs font-display text-muted-foreground hover:text-primary transition-colors py-1 border-t border-border/30 pt-2"
+                        >
+                          <span className="flex items-center gap-1.5"><Swords className="w-3 h-3" /> Ability Scores</span>
+                          {expandedStatsId === char.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                        </button>
+                        {expandedStatsId === char.id && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="grid grid-cols-3 gap-2 mt-2"
+                          >
+                            {Object.entries(ATTR_LABELS).map(([key, { short, color }]) => {
+                              const score = (char as any).attributes?.[key] ?? "—";
+                              const mod = typeof score === "number" ? modifier(score) : null;
+                              return (
+                                <div key={key} className="bg-black/30 border border-border/20 rounded p-2 text-center">
+                                  <div className={`font-display text-xs ${color} mb-0.5`}>{short}</div>
+                                  <div className="font-display text-lg text-foreground leading-none">{score}</div>
+                                  {mod && <div className={`font-sans text-xs mt-0.5 ${mod.startsWith("+") ? "text-green-400" : "text-red-400"}`}>{mod}</div>}
+                                </div>
+                              );
+                            })}
+                          </motion.div>
+                        )}
+                      </div>
+                    )}
                     <CharacterAchievements characterId={char.id} />
                     <div className="mt-4 pt-3 border-t border-border/20">
                       <Button
