@@ -194,9 +194,9 @@
   background-color: hsl(0 0% 2%) !important;
   background-image:
     linear-gradient(to bottom,
-      hsl(0 80% 22% / 0.70) 0%,
-      hsl(0 60% 10% / 0.50) 45%,
-      hsl(0 0% 2% / 0.95)  100%),
+      hsl(0 90% 30% / 0.88) 0%,
+      hsl(0 70% 14% / 0.70) 35%,
+      hsl(0 0% 2% / 1)  100%),
     url('/images/bg-crimson.png') !important;
   background-size: auto, cover !important;
   background-position: center, center center !important;
@@ -240,9 +240,9 @@
   background-color: hsl(140 20% 3%) !important;
   background-image:
     linear-gradient(to bottom,
-      hsl(140 50% 18% / 0.72) 0%,
-      hsl(140 35% 8%  / 0.55) 45%,
-      hsl(140 20% 3%  / 0.95) 100%),
+      hsl(140 60% 22% / 0.88) 0%,
+      hsl(140 38% 10% / 0.70) 35%,
+      hsl(140 20% 3% / 1) 100%),
     url('/images/bg-forest.png') !important;
   background-size: auto, cover !important;
   background-position: center, center center !important;
@@ -255,9 +255,9 @@ html:not([data-theme]) body {
   background-color: hsl(30 15% 8%) !important;
   background-image:
     linear-gradient(to bottom,
-      hsl(43 55% 22% / 0.65) 0%,
-      hsl(30 30% 12% / 0.50) 45%,
-      hsl(30 15% 8% / 0.95)  100%),
+      hsl(43 70% 28% / 0.88) 0%,
+      hsl(30 35% 12% / 0.72) 35%,
+      hsl(30 15% 8% / 1)  100%),
     url('/images/bg-stone.png') !important;
   background-size: auto, cover !important;
   background-position: center, center center !important;
