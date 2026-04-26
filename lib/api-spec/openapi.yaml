@@ -1,22 +1,23 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: D&D Text Game API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: players
+  - name: campaigns
+  - name: game
+  - name: social
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +25,556 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /players:
+    post:
+      operationId: createPlayer
+      tags: [players]
+      summary: Create or login a player
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePlayerRequest"
+      responses:
+        "200":
+          description: Player created or found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+
+  /players/{playerId}:
+    get:
+      operationId: getPlayer
+      tags: [players]
+      summary: Get player by ID
+      parameters:
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Player found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+
+  /players/{playerId}/characters:
+    get:
+      operationId: getPlayerCharacters
+      tags: [players]
+      summary: Get all characters for a player
+      parameters:
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of characters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Character"
+    post:
+      operationId: createCharacter
+      tags: [players]
+      summary: Create a new character
+      parameters:
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCharacterRequest"
+      responses:
+        "201":
+          description: Character created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Character"
+
+  /players/{playerId}/characters/validate:
+    post:
+      operationId: validateCharacter
+      tags: [players]
+      summary: Validate a character concept using AI
+      parameters:
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateCharacterRequest"
+      responses:
+        "200":
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidateCharacterResponse"
+
+  /characters/{characterId}/inventory:
+    get:
+      operationId: getInventory
+      tags: [players]
+      summary: Get character inventory
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Inventory items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryItem"
+    post:
+      operationId: addInventoryItem
+      tags: [players]
+      summary: Add item to inventory
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddInventoryItemRequest"
+      responses:
+        "201":
+          description: Item added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryItem"
+
+  /characters/{characterId}/inventory/{itemId}:
+    delete:
+      operationId: removeInventoryItem
+      tags: [players]
+      summary: Remove/use item from inventory
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Item removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /characters/{characterId}/achievements:
+    get:
+      operationId: getAchievements
+      tags: [players]
+      summary: Get character achievements
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Achievements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Achievement"
+
+  /campaigns:
+    get:
+      operationId: getCampaigns
+      tags: [campaigns]
+      summary: Get all public campaigns plus player's private campaigns
+      parameters:
+        - name: playerId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of campaigns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Campaign"
+    post:
+      operationId: createCampaign
+      tags: [campaigns]
+      summary: Create a new campaign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCampaignRequest"
+      responses:
+        "201":
+          description: Campaign created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+
+  /campaigns/{campaignId}:
+    get:
+      operationId: getCampaign
+      tags: [campaigns]
+      summary: Get campaign by ID
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Campaign found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+
+  /campaigns/{campaignId}/join:
+    post:
+      operationId: joinCampaign
+      tags: [campaigns]
+      summary: Join a campaign
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JoinCampaignRequest"
+      responses:
+        "200":
+          description: Joined campaign
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameSession"
+
+  /campaigns/{campaignId}/discussion:
+    get:
+      operationId: getCampaignDiscussion
+      tags: [campaigns]
+      summary: Get discussion messages for a campaign
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Discussion messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DiscussionMessage"
+    post:
+      operationId: postDiscussionMessage
+      tags: [campaigns]
+      summary: Post a message to campaign discussion
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostDiscussionRequest"
+      responses:
+        "201":
+          description: Message posted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiscussionMessage"
+
+  /campaigns/{campaignId}/party:
+    get:
+      operationId: getCampaignParty
+      tags: [campaigns]
+      summary: Get all active players in a campaign
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Party members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PartyMember"
+
+  /campaigns/{campaignId}/dm-inject:
+    post:
+      operationId: dmInjectEvent
+      tags: [campaigns]
+      summary: Campaign creator injects a DM event into all sessions
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DmInjectRequest"
+      responses:
+        "200":
+          description: Event injected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /sessions/{sessionId}/action:
+    post:
+      operationId: performAction
+      tags: [game]
+      summary: Perform a game action (AI DM responds)
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameActionRequest"
+      responses:
+        "200":
+          description: DM response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameActionResponse"
+
+  /sessions/{sessionId}/history:
+    get:
+      operationId: getSessionHistory
+      tags: [game]
+      summary: Get session message history
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Session history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GameMessage"
+
+  /sessions/{sessionId}/npcs:
+    get:
+      operationId: getSessionNpcs
+      tags: [game]
+      summary: Get NPCs encountered in this session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: NPCs list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Npc"
+
+  /sessions/{sessionId}/journal:
+    get:
+      operationId: getSessionJournal
+      tags: [game]
+      summary: Get campaign journal entries for this session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Journal entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JournalEntry"
+
+  /sessions/{sessionId}/map:
+    get:
+      operationId: getSessionMap
+      tags: [game]
+      summary: Get world map for this session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: World map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorldMap"
+
+  /sessions/{sessionId}/combat:
+    get:
+      operationId: getCombatState
+      tags: [game]
+      summary: Get current combat state
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Combat state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CombatState"
+    put:
+      operationId: updateCombatState
+      tags: [game]
+      summary: Update combat state
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCombatRequest"
+      responses:
+        "200":
+          description: Updated combat state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CombatState"
+
+  /notices:
+    get:
+      operationId: getNotices
+      tags: [social]
+      summary: Get tavern notice board posts
+      responses:
+        "200":
+          description: Notices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notice"
+    post:
+      operationId: postNotice
+      tags: [social]
+      summary: Post to tavern notice board
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostNoticeRequest"
+      responses:
+        "201":
+          description: Notice posted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notice"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +582,455 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success]
+
+    CreatePlayerRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required: [username, password]
+
+    Player:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, username, createdAt]
+
+    ValidateCharacterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        race:
+          type: string
+        class:
+          type: string
+        backstory:
+          type: string
+      required: [name, race, class]
+
+    ValidateCharacterResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        message:
+          type: string
+        suggestion:
+          type: string
+      required: [valid, message]
+
+    CreateCharacterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        race:
+          type: string
+        class:
+          type: string
+        backstory:
+          type: string
+      required: [name, race, class]
+
+    Character:
+      type: object
+      properties:
+        id:
+          type: integer
+        playerId:
+          type: integer
+        name:
+          type: string
+        race:
+          type: string
+        class:
+          type: string
+        backstory:
+          type: string
+        level:
+          type: integer
+        hp:
+          type: integer
+        maxHp:
+          type: integer
+        xp:
+          type: integer
+        isDead:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, playerId, name, race, class, level, hp, maxHp, xp, createdAt]
+
+    InventoryItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        characterId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        quantity:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, characterId, name, type, quantity, createdAt]
+
+    AddInventoryItemRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        quantity:
+          type: integer
+      required: [name, type, quantity]
+
+    Achievement:
+      type: object
+      properties:
+        id:
+          type: integer
+        characterId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        unlockedAt:
+          type: string
+          format: date-time
+      required: [id, characterId, title, description, icon, unlockedAt]
+
+    CreateCampaignRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        setting:
+          type: string
+        isPublic:
+          type: boolean
+        creatorId:
+          type: integer
+        inviteCode:
+          type: string
+      required: [title, description, setting, isPublic, creatorId]
+
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        setting:
+          type: string
+        isPublic:
+          type: boolean
+        creatorId:
+          type: integer
+        inviteCode:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, description, setting, isPublic, creatorId, createdAt]
+
+    JoinCampaignRequest:
+      type: object
+      properties:
+        playerId:
+          type: integer
+        characterId:
+          type: integer
+        inviteCode:
+          type: string
+      required: [playerId, characterId]
+
+    GameSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        campaignId:
+          type: integer
+        playerId:
+          type: integer
+        characterId:
+          type: integer
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, campaignId, playerId, characterId, status, createdAt]
+
+    PostDiscussionRequest:
+      type: object
+      properties:
+        playerId:
+          type: integer
+        username:
+          type: string
+        message:
+          type: string
+      required: [playerId, username, message]
+
+    DiscussionMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        campaignId:
+          type: integer
+        playerId:
+          type: integer
+        username:
+          type: string
+        message:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, campaignId, playerId, username, message, createdAt]
+
+    PartyMember:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+        playerId:
+          type: integer
+        username:
+          type: string
+        characterName:
+          type: string
+        race:
+          type: string
+        class:
+          type: string
+        level:
+          type: integer
+        hp:
+          type: integer
+        maxHp:
+          type: integer
+        isDead:
+          type: boolean
+      required: [sessionId, playerId, username, characterName, race, class, level, hp, maxHp]
+
+    DmInjectRequest:
+      type: object
+      properties:
+        creatorId:
+          type: integer
+        event:
+          type: string
+      required: [creatorId, event]
+
+    GameActionRequest:
+      type: object
+      properties:
+        action:
+          type: string
+        characterId:
+          type: integer
+      required: [action]
+
+    GameActionResponse:
+      type: object
+      properties:
+        narrative:
+          type: string
+        sessionId:
+          type: integer
+        xpGained:
+          type: integer
+        hpChange:
+          type: integer
+        diceRequest:
+          type: string
+        isDead:
+          type: boolean
+        newAchievements:
+          type: array
+          items:
+            $ref: "#/components/schemas/Achievement"
+        newItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryItem"
+        newLocation:
+          type: string
+      required: [narrative, sessionId]
+
+    GameMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        sessionId:
+          type: integer
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, sessionId, role, content, createdAt]
+
+    Npc:
+      type: object
+      properties:
+        id:
+          type: integer
+        sessionId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        disposition:
+          type: string
+        firstMet:
+          type: string
+      required: [id, sessionId, name, description, disposition]
+
+    JournalEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        sessionId:
+          type: integer
+        summary:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, sessionId, summary, createdAt]
+
+    WorldMap:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+        locations:
+          type: array
+          items:
+            type: string
+        currentLocation:
+          type: string
+        ascii:
+          type: string
+      required: [sessionId, locations]
+
+    CombatState:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+        active:
+          type: boolean
+        round:
+          type: integer
+        combatants:
+          type: array
+          items:
+            $ref: "#/components/schemas/Combatant"
+      required: [sessionId, active, round, combatants]
+
+    Combatant:
+      type: object
+      properties:
+        name:
+          type: string
+        hp:
+          type: integer
+        maxHp:
+          type: integer
+        initiative:
+          type: integer
+        isPlayer:
+          type: boolean
+      required: [name, hp, maxHp, initiative, isPlayer]
+
+    UpdateCombatRequest:
+      type: object
+      properties:
+        active:
+          type: boolean
+        round:
+          type: integer
+        combatants:
+          type: array
+          items:
+            $ref: "#/components/schemas/Combatant"
+      required: [active, round, combatants]
+
+    Notice:
+      type: object
+      properties:
+        id:
+          type: integer
+        playerId:
+          type: integer
+        username:
+          type: string
+        content:
+          type: string
+        campaignTitle:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, playerId, username, content, createdAt]
+
+    PostNoticeRequest:
+      type: object
+      properties:
+        playerId:
+          type: integer
+        username:
+          type: string
+        content:
+          type: string
+        campaignTitle:
+          type: string
+      required: [playerId, username, content]

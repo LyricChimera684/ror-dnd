@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "D&D Text Adventure"
+version = "1.0.0"
+id = "artifacts/dnd-game"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24066
+
+[services.development]
+run = "pnpm --filter @workspace/dnd-game run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/dnd-game", "run", "build" ]
+publicDir = "artifacts/dnd-game/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24066"
+BASE_PATH = "/"

@@ -1,0 +1,21 @@
+packages:
+  "framer-motion": "For page transitions and smooth UI animations"
+  "clsx": "For conditional tailwind classes"
+  "tailwind-merge": "For merging tailwind classes safely"
+  "lucide-react": "For UI icons"
+
+images:
+  - path: "artifacts/dnd-game/public/images/bg-stone.png"
+    description: "Dark seamless medieval castle stone wall texture, dimly lit, deep shadows, high quality"
+    aspect_ratio: "16:9"
+  - path: "artifacts/dnd-game/public/images/bg-parchment.png"
+    description: "Old ancient blank magical parchment paper texture, slightly burned edges, highly detailed"
+    aspect_ratio: "1:1"
+  - path: "artifacts/dnd-game/public/images/hero-dungeon.png"
+    description: "Atmospheric dark fantasy dungeon entrance lit by flickering wall torches, cinematic lighting, concept art style"
+    aspect_ratio: "16:9"
+
+notes:
+  - Using generated hooks from @workspace/api-client-react
+  - Storing auth in localStorage as 'dnd_player'
+  - Storing active session in localStorage as 'dnd_session'

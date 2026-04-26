@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: 'Cormorant Garamond', serif;
+  --font-display: 'Cinzel', serif;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-ring: hsl(var(--ring));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+}
+
+:root {
+  /* Dark Fantasy Theme */
+  --background: 30 15% 8%; /* Very dark warm gray/brown */
+  --foreground: 45 40% 85%; /* Aged parchment text */
+  
+  --primary: 43 74% 49%; /* Antiqued Gold */
+  --primary-foreground: 30 15% 8%;
+  
+  --secondary: 0 100% 25%; /* Deep Blood Red */
+  --secondary-foreground: 45 40% 90%;
+  
+  --muted: 30 10% 15%;
+  --muted-foreground: 45 20% 60%;
+  
+  --accent: 25 30% 20%; /* Dark wood/leather */
+  --accent-foreground: 43 74% 49%;
+  
+  --destructive: 0 80% 40%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 30 20% 20%;
+  --ring: 43 74% 49%;
+  
+  --card: 30 15% 10%;
+  --card-foreground: 45 40% 85%;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased font-sans selection:bg-primary/30 selection:text-primary-foreground;
+    background-image: 
+      radial-gradient(circle at 50% 0%, hsl(var(--accent) / 0.5) 0%, transparent 70%),
+      url('/images/bg-stone.png');
+    background-blend-mode: overlay;
+    background-size: cover;
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-bold tracking-wider;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  }
+
+  /* Custom Scrollbar for immersive feel */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+    border-left: 1px solid hsl(var(--border));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--accent));
+    border: 1px solid hsl(var(--border));
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.5);
+  }
+}
+
+@layer utilities {
+  .bg-parchment {
+    background-color: #E8DCC4;
+    background-image: url('/images/bg-parchment.png');
+    background-blend-mode: multiply;
+    color: #2A241C;
+  }
+  
+  .border-ornate {
+    border: 2px solid hsl(var(--border));
+    border-image: linear-gradient(to bottom right, hsl(var(--primary)), hsl(var(--border)), hsl(var(--primary))) 1;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+  }
+}
