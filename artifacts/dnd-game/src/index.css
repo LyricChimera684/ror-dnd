@@ -87,11 +87,14 @@
 
 /* Glass theme: rich blob-gradient background so frosted surfaces have depth */
 [data-theme="glass"] body {
+  background-color: hsl(0 0% 100%) !important;
   background-image:
-    radial-gradient(ellipse at 18% 5%,  hsl(211 100% 82% / 0.45) 0%, transparent 42%),
-    radial-gradient(ellipse at 82% 92%, hsl(270 80%  82% / 0.30) 0%, transparent 42%),
-    radial-gradient(ellipse at 60% 35%, hsl(140 60%  86% / 0.20) 0%, transparent 38%);
-  background-color: hsl(0 0% 100%);
+    radial-gradient(ellipse 90% 55% at 15% 8%,  hsl(211 100% 80% / 0.55) 0%, transparent 100%),
+    radial-gradient(ellipse 75% 50% at 88% 88%, hsl(270 80%  80% / 0.40) 0%, transparent 100%),
+    radial-gradient(ellipse 65% 45% at 62% 38%, hsl(140 60%  84% / 0.28) 0%, transparent 100%) !important;
+  background-size: 100% 100% !important;
+  background-attachment: scroll !important;
+  background-blend-mode: normal !important;
 }
 
 /* Frosted-glass surface for every bg-card element */
@@ -114,6 +117,33 @@
 /* Default button gradient: swap hardcoded yellow-700 end for deep Apple blue */
 [data-theme="glass"] .to-yellow-700 {
   --tw-gradient-to: hsl(211 100% 36%);
+}
+
+/* Inputs & textareas: override hardcoded bg-black classes, ensure readability */
+[data-theme="glass"] input,
+[data-theme="glass"] textarea,
+[data-theme="glass"] select {
+  background-color: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: hsl(220 15% 12%) !important;
+  border-color: hsl(220 13% 80%) !important;
+}
+[data-theme="glass"] input::placeholder,
+[data-theme="glass"] textarea::placeholder {
+  color: hsl(220 9% 58%) !important;
+  opacity: 1;
+}
+[data-theme="glass"] input:focus,
+[data-theme="glass"] textarea:focus {
+  border-color: hsl(211 100% 50%) !important;
+  box-shadow: 0 0 0 2px hsl(211 100% 50% / 0.2) !important;
+}
+
+/* Labels: ensure they're dark on white */
+[data-theme="glass"] label,
+[data-theme="glass"] .text-muted-foreground {
+  color: hsl(220 9% 38%) !important;
 }
 
 /* Border-glow override to Apple blue */
