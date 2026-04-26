@@ -215,7 +215,7 @@ export default function Campaigns() {
   return (
     <AppLayout>
       <div className="space-y-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card/50 p-6 border border-border/50 rounded-2xl sticky top-3 z-10 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card/50 p-6 border border-border/50 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
           <div>
             <h1 className="text-4xl mb-2">Campaign Boards</h1>
             <p className="font-sans text-muted-foreground italic">Find a party, or gather your own.</p>
