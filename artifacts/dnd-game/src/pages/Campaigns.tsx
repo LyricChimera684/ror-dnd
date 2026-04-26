@@ -215,7 +215,7 @@ export default function Campaigns() {
   return (
     <AppLayout>
       <div className="space-y-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card/50 p-6 border-b border-border">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card/50 p-6 border border-border/50 rounded-2xl sticky top-3 z-10 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
           <div>
             <h1 className="text-4xl mb-2">Campaign Boards</h1>
             <p className="font-sans text-muted-foreground italic">Find a party, or gather your own.</p>
@@ -227,7 +227,7 @@ export default function Campaigns() {
 
         {/* Character Selection Panel */}
         <div className="max-w-2xl mx-auto">
-          <div className="bg-black/30 border border-primary/20 p-5">
+          <div className="bg-black/30 border border-primary/20 rounded-2xl p-5 shadow-[0_8px_24px_rgba(0,0,0,0.18)]">
             <div className="flex items-center gap-2 mb-4">
               <Sword className="w-4 h-4 text-primary" />
               <h3 className="font-display text-lg text-primary tracking-wide">Choose Your Adventurer</h3>
@@ -273,13 +273,13 @@ export default function Campaigns() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-card border-ornate p-6 flex flex-col hover:shadow-[0_0_30px_rgba(212,175,55,0.1)] transition-shadow duration-500"
+                  className="bg-card border border-border/50 rounded-2xl p-6 flex flex-col hover:border-primary/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.1)] transition-all duration-500"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-3xl text-primary">{camp.title}</h3>
                     <div className="flex items-center gap-1.5">
                       {lockInfo && (
-                        <div className="flex items-center gap-1 px-2 py-0.5 border border-primary/20 bg-primary/5 text-xs font-display text-primary/70">
+                        <div className="flex items-center gap-1 px-2 py-0.5 border border-primary/20 bg-primary/5 text-xs font-display text-primary/70 rounded-full">
                           {lockInfo.canSwap ? (
                             <><Shield className="w-3 h-3 text-green-400" /> <span className="text-green-400">Swap available</span></>
                           ) : (
@@ -314,7 +314,7 @@ export default function Campaigns() {
                       </div>
                     )}
                     {!camp.isPublic && camp.inviteCode && isOwner && (
-                      <div className="text-sm text-primary/80 bg-primary/10 px-2 py-1 inline-block border border-primary/20">
+                      <div className="text-sm text-primary/80 bg-primary/10 px-2 py-1 inline-block border border-primary/20 rounded-full">
                         Code: {camp.inviteCode}
                       </div>
                     )}
@@ -326,7 +326,7 @@ export default function Campaigns() {
                         <Input
                           placeholder="Invite Code"
                           id={`code-${camp.id}`}
-                          className="h-12"
+                          className="h-12 rounded-full"
                         />
                         <Button
                           onClick={() => {
@@ -340,7 +340,7 @@ export default function Campaigns() {
                       </div>
                     ) : (
                       <Button
-                        className="w-full"
+                        className="w-full rounded-full"
                         onClick={() => handleJoin(camp.id)}
                         disabled={joiningId === camp.id || !selectedCharId}
                       >
@@ -352,7 +352,7 @@ export default function Campaigns() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="w-full text-red-400 hover:text-red-300 hover:bg-red-950/30 justify-center gap-2"
+                        className="w-full rounded-full text-red-400 hover:text-red-300 hover:bg-red-950/30 justify-center gap-2"
                         onClick={() => handleDeleteCampaign(camp.id)}
                         disabled={deletingId === camp.id}
                       >
