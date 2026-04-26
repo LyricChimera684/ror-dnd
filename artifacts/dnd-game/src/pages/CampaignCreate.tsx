@@ -138,6 +138,45 @@ const PRESETS: CampaignPreset[] = [
       "Locals whisper of magical fruit that heals any wound or poisons without cure. Both grow on the Gulthias Tree, deep in a sunken ruin overrun by goblins and kobolds. The party descends to find missing adventurers — and discovers the tree is only the beginning of what lurks in the dark below.",
     tags: ["Dungeon", "Starter", "Classic"],
   },
+  {
+    id: "neo-noir",
+    name: "Neon Noir: Undercity",
+    badge: "Modern Mystery",
+    icon: <Building2 className="w-7 h-7" />,
+    accentColor:
+      "from-background to-background border-primary/60 hover:border-primary/80",
+    setting:
+      "A rain-slick megacity of hover traffic, hacker guilds, and midnight alleys where magic, tech, and corporate power collide.",
+    description:
+      "The party becomes entangled in a missing-person case that spirals into a conspiracy spanning night markets, black-site labs, and a citywide blackout. Every clue leads deeper into the undercity, where surveillance, synthetic spirits, and rival crews are all watching.",
+    tags: ["Cyberpunk", "Investigation", "Urban"],
+  },
+  {
+    id: "apocalypse",
+    name: "Skyfall Protocol",
+    badge: "Modern Thriller",
+    icon: <Flame className="w-7 h-7" />,
+    accentColor:
+      "from-background to-background border-primary/60 hover:border-primary/80",
+    setting:
+      "A near-future world of bunker cities, drone patrols, and failing climate shields as the last safe zones begin to crack.",
+    description:
+      "When a containment system fails, the party is forced across a fractured landscape of evacuation zones, rogue AI checkpoints, and flooded ruins to prevent a cascading global disaster. Time is short, trust is scarce, and every choice changes who gets out alive.",
+    tags: ["Thriller", "High Stakes", "Modern"],
+  },
+  {
+    id: "mansion",
+    name: "Haunted Manor: Redacted",
+    badge: "Modern Horror",
+    icon: <Skull className="w-7 h-7" />,
+    accentColor:
+      "from-background to-background border-primary/60 hover:border-primary/80",
+    setting:
+      "An abandoned estate on the edge of town with security cameras, sealed rooms, and a decades-old disappearance nobody wants reopened.",
+    description:
+      "A document leak, a locked basement, and a house that keeps changing after midnight pull the party into a modern ghost story. What begins as an urban legend becomes a tense investigation of edited footage, hidden passageways, and something that only appears when the power goes out.",
+    tags: ["Horror", "Investigation", "Modern"],
+  },
 ];
 
 // ─── Mode Picker ──────────────────────────────────────────────────────────────
