@@ -21,7 +21,7 @@ function ensureCtx(): AudioContext | null {
     try {
       ctx = new Ctor();
       master = ctx.createGain();
-      master.gain.value = 0.35;
+      master.gain.value = 0.6;
       master.connect(ctx.destination);
     } catch {
       ctx = null;

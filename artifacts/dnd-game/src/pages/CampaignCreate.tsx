@@ -161,7 +161,7 @@ function ModePicker({ onSelect }: { onSelect: (mode: "preset" | "diy") => void }
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onSelect("preset")}
-            className="group flex flex-col items-center gap-4 p-8 bg-black/30 border border-border hover:border-primary/60 hover:bg-black/50 transition-all duration-300 cursor-pointer text-left"
+            className="group flex flex-col items-center gap-4 p-8 bg-primary/10 border border-border hover:border-primary/60 hover:bg-primary/20 transition-all duration-300 cursor-pointer text-left"
           >
             <div className="w-16 h-16 flex items-center justify-center border border-primary/40 bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
               <Wand2 className="w-8 h-8" />
@@ -178,7 +178,7 @@ function ModePicker({ onSelect }: { onSelect: (mode: "preset" | "diy") => void }
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onSelect("diy")}
-            className="group flex flex-col items-center gap-4 p-8 bg-black/30 border border-border hover:border-primary/60 hover:bg-black/50 transition-all duration-300 cursor-pointer text-left"
+            className="group flex flex-col items-center gap-4 p-8 bg-primary/10 border border-border hover:border-primary/60 hover:bg-primary/20 transition-all duration-300 cursor-pointer text-left"
           >
             <div className="w-16 h-16 flex items-center justify-center border border-primary/40 bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
               <Pencil className="w-8 h-8" />

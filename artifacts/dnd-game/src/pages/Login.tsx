@@ -108,7 +108,7 @@ export default function Login() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="e.g. GandalfTheGrey"
-                className="bg-black/60"
+                className="bg-white/85 text-foreground placeholder:text-muted-foreground border-border/80 focus-visible:ring-primary/30"
               />
             </div>
 
@@ -119,7 +119,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="bg-black/60"
+                className="bg-white/85 text-foreground placeholder:text-muted-foreground border-border/80 focus-visible:ring-primary/30"
               />
             </div>
 
