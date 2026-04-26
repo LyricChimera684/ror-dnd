@@ -12,7 +12,7 @@ import {
   worldMapsTable,
   campaignMembersTable,
 } from "@workspace/db";
-import { eq, count } from "drizzle-orm";
+import { eq, count, and } from "drizzle-orm";
 import {
   JoinCampaignParams,
   JoinCampaignBody,
@@ -176,14 +176,63 @@ router.post("/campaigns/:campaignId/join", async (req, res) => {
     return;
   }
 
-  // Track this player's membership (upsert — update characterId if they switch characters)
-  await db
-    .insert(campaignMembersTable)
-    .values({ campaignId, playerId: body.playerId, characterId: body.characterId })
-    .onConflictDoUpdate({
-      target: [campaignMembersTable.campaignId, campaignMembersTable.playerId],
-      set: { characterId: body.characterId, joinedAt: new Date() },
-    });
+  // Check for existing membership
+  const [existingMember] = await db
+    .select()
+    .from(campaignMembersTable)
+    .where(and(
+      eq(campaignMembersTable.campaignId, campaignId),
+      eq(campaignMembersTable.playerId, body.playerId)
+    ))
+    .limit(1);
+
+  if (existingMember) {
+    if (existingMember.isLocked && !existingMember.canSwap) {
+      // Character is locked — send them to their existing session without changing anything
+      const [existingSession] = await db
+        .select()
+        .from(gameSessionsTable)
+        .where(eq(gameSessionsTable.campaignId, campaignId))
+        .limit(1);
+      if (existingSession) {
+        res.json({ ...existingSession, characterLocked: true });
+        return;
+      }
+    } else if (existingMember.canSwap) {
+      // Safe haven — allow character swap, copy new character's base stats
+      await db
+        .update(campaignMembersTable)
+        .set({
+          characterId: body.characterId,
+          campaignHp: character.hp,
+          campaignMaxHp: character.maxHp,
+          campaignLevel: character.level,
+          campaignXp: character.xp,
+          campaignIsDead: false,
+          canSwap: false,
+          isLocked: true,
+          joinedAt: new Date(),
+        })
+        .where(eq(campaignMembersTable.id, existingMember.id));
+    }
+    // else: re-join with same character, just proceed normally
+  } else {
+    // New member — insert with campaign-specific stats copied from character baseline
+    await db
+      .insert(campaignMembersTable)
+      .values({
+        campaignId,
+        playerId: body.playerId,
+        characterId: body.characterId,
+        campaignHp: character.hp,
+        campaignMaxHp: character.maxHp,
+        campaignLevel: character.level,
+        campaignXp: character.xp,
+        campaignIsDead: false,
+        isLocked: true,
+        canSwap: false,
+      });
+  }
 
   // Reuse existing shared session for this campaign if one already exists
   const [existingSession] = await db
@@ -193,7 +242,6 @@ router.post("/campaigns/:campaignId/join", async (req, res) => {
     .limit(1);
 
   if (existingSession) {
-    // Returning player — just drop them into the existing session
     res.json(existingSession);
     return;
   }
@@ -242,7 +290,26 @@ router.post("/sessions/:sessionId/action", async (req, res) => {
   const characterId = body.characterId ?? session.characterId;
   const [character] = await db.select().from(charactersTable).where(eq(charactersTable.id, characterId)).limit(1);
 
-  if (character?.isDead) {
+  // Get the campaign-specific member record for this player
+  const [campaignMember] = character
+    ? await db
+        .select()
+        .from(campaignMembersTable)
+        .where(and(
+          eq(campaignMembersTable.campaignId, session.campaignId),
+          eq(campaignMembersTable.playerId, character.playerId)
+        ))
+        .limit(1)
+    : [undefined];
+
+  // Use campaign-specific stats; fall back to global character stats for legacy entries
+  const effectiveHp = campaignMember?.campaignHp ?? character?.hp ?? 20;
+  const effectiveMaxHp = campaignMember?.campaignMaxHp ?? character?.maxHp ?? 20;
+  const effectiveLevel = campaignMember?.campaignLevel ?? character?.level ?? 1;
+  const effectiveXp = campaignMember?.campaignXp ?? character?.xp ?? 0;
+  const effectiveIsDead = campaignMember?.campaignIsDead ?? character?.isDead ?? false;
+
+  if (effectiveIsDead) {
     res.json({
       narrative: "Your character has fallen. Death claims you... for now.",
       sessionId,
@@ -261,7 +328,10 @@ router.post("/sessions/:sessionId/action", async (req, res) => {
   const memberChars = await Promise.all(
     members.map(async (m) => {
       const [c] = await db.select().from(charactersTable).where(eq(charactersTable.id, m.characterId)).limit(1);
-      return c;
+      const memberHp = m.campaignHp ?? c?.hp ?? 0;
+      const memberMaxHp = m.campaignMaxHp ?? c?.maxHp ?? 20;
+      const memberLevel = m.campaignLevel ?? c?.level ?? 1;
+      return c ? { ...c, hp: memberHp, maxHp: memberMaxHp, level: memberLevel } : null;
     })
   );
   const partyContext = memberChars.filter(Boolean).length > 1
@@ -299,11 +369,12 @@ router.post("/sessions/:sessionId/action", async (req, res) => {
 
 Campaign: "${campaign?.title}" — ${campaign?.description}
 Setting: ${campaign?.setting}
-Acting now: ${character?.name} (Lvl ${character?.level} ${character?.race} ${character?.class}, HP ${character?.hp}/${character?.maxHp}).${attrContext}${partyContext}${npcContext}${mapContext}${statusContext}
+Acting now: ${character?.name} (Lvl ${effectiveLevel} ${character?.race} ${character?.class}, HP ${effectiveHp}/${effectiveMaxHp}).${attrContext}${partyContext}${npcContext}${mapContext}${statusContext}
 
 DICE: Only add [ROLL:XdY] for direct combat attacks, dangerous physical feats (jumping a chasm, picking a lock under pressure), or contested checks where failure has real consequences. Do NOT request rolls for talking, walking, looking around, resting, or anything routine.
 If message starts with "🎲 Rolled" — narrate the result briefly, no new roll needed.
 TAGS (only when genuinely applicable): [NPC:Name:desc:friendly/neutral/hostile] | [ITEM:Name:desc:type] | [LOCATION:Name] | [STATUS:EffectName:add/remove]
+SAFE HAVEN: If the party is resting at a clear safe haven (inn, tavern, base, hotel, cottage, guild hall, monastery, barracks, palace — NOT campfire, forest, road, dungeon, cave, abandoned building, wilderness), append [SAFE_HAVEN] after the stat JSON.
 END every response with JSON: {"xp":5,"hp":0} (xp 5-25, hp negative=damage/positive=heal/0=none)
 
 Keep responses punchy and reactive. Max 2 sentences.`;
@@ -329,6 +400,9 @@ Keep responses punchy and reactive. Max 2 sentences.`;
 
   const rawResponse = completion.choices[0].message.content ?? "The Dungeon Master pauses...";
 
+  // Detect safe haven signal
+  const safeHavenDetected = /\[SAFE_HAVEN\]/i.test(rawResponse);
+
   // Parse dice request
   const diceMatch = rawResponse.match(/\[ROLL:(\d+d\d+)\]/i);
   const diceRequest = diceMatch ? diceMatch[1] : undefined;
@@ -346,6 +420,7 @@ Keep responses punchy and reactive. Max 2 sentences.`;
     .replace(/\[ITEM:[^\]]+\]/g, "")
     .replace(/\[LOCATION:[^\]]+\]/g, "")
     .replace(/\[STATUS:[^\]]+\]/g, "")
+    .replace(/\[SAFE_HAVEN\]/gi, "")
     .trim();
 
   if (jsonMatch) {
@@ -361,7 +436,7 @@ Keep responses punchy and reactive. Max 2 sentences.`;
 
   await db.insert(gameMessagesTable).values({ sessionId, role: "assistant", content: narrative });
 
-  // Parse and apply status effect changes
+  // Parse and apply status effect changes (on global character — cosmetic only)
   if (character) {
     const statusMatches = [...rawResponse.matchAll(/\[STATUS:([^:]+):(add|remove)\]/gi)];
     if (statusMatches.length > 0) {
@@ -388,21 +463,40 @@ Keep responses punchy and reactive. Max 2 sentences.`;
   let newAchievements: typeof achievementsTable.$inferSelect[] = [];
   let newItems: typeof inventoryItemsTable.$inferSelect[] = [];
   let isDead = false;
+  let updatedCampaignStats: { hp: number; maxHp: number; level: number; xp: number } | null = null;
 
   if (character) {
-    const prevLevel = character.level;
-    const newXp = character.xp + xpGained;
+    const prevLevel = effectiveLevel;
+    const newXp = effectiveXp + xpGained;
     const newLevel = Math.floor(newXp / 100) + 1;
     const newMaxHp = newLevel * 20;
-    const rawNewHp = character.hp + hpChange;
+    const rawNewHp = effectiveHp + hpChange;
     const newHp = Math.max(0, Math.min(newMaxHp, rawNewHp));
     isDead = rawNewHp <= 0;
     const leveledUp = newLevel > prevLevel;
 
-    await db
-      .update(charactersTable)
-      .set({ xp: newXp, hp: newHp, level: newLevel, maxHp: newMaxHp, isDead })
-      .where(eq(charactersTable.id, character.id));
+    updatedCampaignStats = { hp: newHp, maxHp: newMaxHp, level: newLevel, xp: newXp };
+
+    if (campaignMember) {
+      // Update campaign-specific stats
+      await db
+        .update(campaignMembersTable)
+        .set({
+          campaignHp: newHp,
+          campaignMaxHp: newMaxHp,
+          campaignLevel: newLevel,
+          campaignXp: newXp,
+          campaignIsDead: isDead,
+          canSwap: safeHavenDetected,
+        })
+        .where(eq(campaignMembersTable.id, campaignMember.id));
+    } else {
+      // Fallback: update global character stats for legacy entries without campaign membership
+      await db
+        .update(charactersTable)
+        .set({ xp: newXp, hp: newHp, level: newLevel, maxHp: newMaxHp, isDead })
+        .where(eq(charactersTable.id, character.id));
+    }
 
     const [journalTask, itemsTask, achievementsTask] = await Promise.all([
       maybeGenerateJournalEntry(sessionId, actionCount + 1),
@@ -424,6 +518,8 @@ Keep responses punchy and reactive. Max 2 sentences.`;
     newAchievements,
     newItems,
     newLocation,
+    canSwap: safeHavenDetected,
+    campaignStats: updatedCampaignStats,
   });
 });
 

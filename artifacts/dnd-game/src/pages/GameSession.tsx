@@ -498,8 +498,40 @@ function AttributesPanel({ character }: { character: { attributes?: unknown; spe
   );
 }
 
+// ─── Safe Haven Banner ────────────────────────────────────────────────────────
+function SafeHavenBanner({ onFlee }: { onFlee: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="shrink-0 flex items-center justify-between gap-4 px-4 py-2.5 bg-emerald-950/60 border-b border-emerald-700/40 text-sm"
+    >
+      <div className="flex items-center gap-2 text-emerald-300 font-sans">
+        <Shield className="w-4 h-4 shrink-0" />
+        <span>You're in a safe place — you may return to the Tavern to change your adventurer.</span>
+      </div>
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={onFlee}
+        className="shrink-0 text-xs text-emerald-300 hover:text-emerald-100 border border-emerald-700/40 hover:bg-emerald-900/40"
+      >
+        Flee to Tavern
+      </Button>
+    </motion.div>
+  );
+}
+
 // ─── Main GameSession ─────────────────────────────────────────────────────────
 type Tab = "game" | "discuss" | "party" | "journal" | "map" | "npcs" | "advanced";
+
+interface CampaignStats {
+  hp: number;
+  maxHp: number;
+  level: number;
+  xp: number;
+  isDead: boolean;
+}
 
 export default function GameSession() {
   const { sessionId } = useParams();
@@ -515,10 +547,28 @@ export default function GameSession() {
   const [waitingForRoll, setWaitingForRoll] = useState(false);
   const [newAchievements, setNewAchievements] = useState<Array<{ title: string; description: string; icon: string }>>([]);
   const [characterDead, setCharacterDead] = useState(false);
+  const [campaignStats, setCampaignStats] = useState<CampaignStats | null>(null);
+  const [canSwap, setCanSwap] = useState(false);
 
   useEffect(() => {
     if (!user || !session || session.sessionId !== Number(sessionId)) setLocation("/dashboard");
   }, [user, session, sessionId, setLocation]);
+
+  // Fetch campaign-specific stats on mount
+  useEffect(() => {
+    if (!session?.campaignId || !user?.id) return;
+    const apiBase = import.meta.env.VITE_API_URL || "";
+    fetch(`${apiBase}/api/campaigns/${session.campaignId}/member-stats?playerId=${user.id}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data) {
+          setCampaignStats({ hp: data.hp, maxHp: data.maxHp, level: data.level, xp: data.xp, isDead: data.isDead });
+          setCanSwap(data.canSwap);
+          if (data.isDead) setCharacterDead(true);
+        }
+      })
+      .catch(() => {});
+  }, [session?.campaignId, user?.id]);
 
   const { data: history, isLoading: historyLoading, refetch: refetchHistory } = useGetSessionHistory(
     Number(sessionId), { query: { enabled: !!sessionId, refetchInterval: 6000 } }
@@ -530,12 +580,12 @@ export default function GameSession() {
   const activeCharacter = characters?.find((c) => c.id === session?.characterId);
 
   useEffect(() => {
-    if (activeCharacter?.isDead) setCharacterDead(true);
-  }, [activeCharacter]);
+    if (!campaignStats && activeCharacter?.isDead) setCharacterDead(true);
+  }, [activeCharacter, campaignStats]);
 
   const { mutate: takeAction, isPending: actionPending } = usePerformAction({
     mutation: {
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         setActionInput("");
         setWaitingForRoll(false);
         refetchHistory();
@@ -543,6 +593,10 @@ export default function GameSession() {
         if (data.diceRequest) { setPendingDice(data.diceRequest); setWaitingForRoll(true); }
         else { setPendingDice(null); }
         if (data.isDead) setCharacterDead(true);
+        if (data.campaignStats) {
+          setCampaignStats({ ...data.campaignStats, isDead: data.isDead ?? false });
+        }
+        setCanSwap(data.canSwap ?? false);
         if (data.newAchievements && data.newAchievements.length > 0) {
           setNewAchievements(data.newAchievements as Array<{ title: string; description: string; icon: string }>);
         }
@@ -568,9 +622,16 @@ export default function GameSession() {
 
   if (!user || !session) return null;
 
-  const hpPct = activeCharacter ? Math.max(0, Math.min(100, (activeCharacter.hp / activeCharacter.maxHp) * 100)) : 0;
+  // Use campaign-specific stats when available, fall back to global character stats
+  const displayHp = campaignStats?.hp ?? activeCharacter?.hp ?? 0;
+  const displayMaxHp = campaignStats?.maxHp ?? activeCharacter?.maxHp ?? 20;
+  const displayLevel = campaignStats?.level ?? activeCharacter?.level ?? 1;
+  const displayXp = campaignStats?.xp ?? activeCharacter?.xp ?? 0;
+  const displayIsDead = campaignStats?.isDead ?? activeCharacter?.isDead ?? false;
+
+  const hpPct = Math.max(0, Math.min(100, (displayHp / displayMaxHp) * 100));
   const xpToNext = 100;
-  const xpPct = activeCharacter ? (activeCharacter.xp % xpToNext) / xpToNext * 100 : 0;
+  const xpPct = (displayXp % xpToNext) / xpToNext * 100;
 
   const tabDefs: { id: Tab; icon: React.ReactNode; label: string }[] = [
     { id: "game", icon: <Sword className="w-4 h-4" />, label: "Adventure" },
@@ -608,12 +669,12 @@ export default function GameSession() {
           <div className="p-4 flex-1 overflow-y-auto">
             <div className="text-center mb-5">
               <div className="w-16 h-16 mx-auto border-2 border-primary rounded-full bg-black/50 flex items-center justify-center mb-3 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
-                {activeCharacter.isDead ? <Skull className="w-8 h-8 text-red-800/60" /> : <Sword className="w-8 h-8 text-primary/50" />}
+                {displayIsDead ? <Skull className="w-8 h-8 text-red-800/60" /> : <Sword className="w-8 h-8 text-primary/50" />}
               </div>
               <h3 className="text-xl font-display text-foreground">{activeCharacter.name}</h3>
-              {activeCharacter.isDead && <div className="text-xs text-red-400 font-display mb-1">💀 Fallen</div>}
+              {displayIsDead && <div className="text-xs text-red-400 font-display mb-1">💀 Fallen</div>}
               <p className="text-primary italic text-sm">{activeCharacter.race} · {activeCharacter.class}</p>
-              <span className="mt-1 inline-flex px-2 py-0.5 bg-white/5 border border-white/10 rounded font-display tracking-widest text-xs">LEVEL {activeCharacter.level}</span>
+              <span className="mt-1 inline-flex px-2 py-0.5 bg-white/5 border border-white/10 rounded font-display tracking-widest text-xs">LEVEL {displayLevel}</span>
               {((activeCharacter.statusEffects as string[]) ?? []).length > 0 && (
                 <div className="flex flex-wrap justify-center gap-1 mt-2">
                   {((activeCharacter.statusEffects as string[]) ?? []).map((e) => (
@@ -627,7 +688,7 @@ export default function GameSession() {
               <div>
                 <div className="flex justify-between text-xs mb-1 text-muted-foreground">
                   <span className="flex items-center gap-1"><Heart className="w-3 h-3 text-red-400" /> HP</span>
-                  <span className={activeCharacter.hp < activeCharacter.maxHp * 0.3 ? "text-red-400 font-bold" : ""}>{activeCharacter.hp} / {activeCharacter.maxHp}</span>
+                  <span className={displayHp < displayMaxHp * 0.3 ? "text-red-400 font-bold" : ""}>{displayHp} / {displayMaxHp}</span>
                 </div>
                 <div className="h-2.5 bg-black/60 border border-border rounded-full overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-red-900 to-red-500 transition-all duration-700" style={{ width: `${hpPct}%` }} />
@@ -636,15 +697,15 @@ export default function GameSession() {
               <div>
                 <div className="flex justify-between text-xs mb-1 text-muted-foreground">
                   <span className="flex items-center gap-1"><Star className="w-3 h-3 text-primary" /> XP</span>
-                  <span>{activeCharacter.xp} XP</span>
+                  <span>{displayXp} XP</span>
                 </div>
                 <div className="h-2 bg-black/60 border border-border rounded-full overflow-hidden">
                   <div className="h-full bg-primary transition-all duration-700" style={{ width: `${xpPct}%` }} />
                 </div>
-                <div className="text-right text-xs text-muted-foreground/60 mt-0.5">{activeCharacter.xp % xpToNext} / {xpToNext} to next</div>
+                <div className="text-right text-xs text-muted-foreground/60 mt-0.5">{displayXp % xpToNext} / {xpToNext} to next</div>
               </div>
               <div className="pt-3 border-t border-border/30 grid grid-cols-2 gap-2 text-xs">
-                {[["Level", activeCharacter.level], ["Max HP", activeCharacter.maxHp]].map(([l, v]) => (
+                {[["Level", displayLevel], ["Max HP", displayMaxHp]].map(([l, v]) => (
                   <div key={String(l)} className="bg-black/30 border border-border/30 rounded p-2 text-center">
                     <div className="text-muted-foreground">{l}</div>
                     <div className="text-foreground font-bold text-sm">{v}</div>
@@ -690,13 +751,20 @@ export default function GameSession() {
           </div>
           <div className="lg:hidden text-right shrink-0">
             <div className="text-xs text-primary font-display">{activeCharacter?.name}</div>
-            <div className="text-xs text-muted-foreground">❤ {activeCharacter?.hp}/{activeCharacter?.maxHp}</div>
+            <div className="text-xs text-muted-foreground">❤ {displayHp}/{displayMaxHp}</div>
           </div>
         </div>
 
+        {/* Safe Haven Banner */}
+        <AnimatePresence>
+          {canSwap && (
+            <SafeHavenBanner onFlee={() => setLocation("/campaigns")} />
+          )}
+        </AnimatePresence>
+
         {/* Combat tracker (shown above content when active) */}
         {session && activeCharacter && (
-          <CombatTracker sessionId={Number(sessionId)} characterName={activeCharacter.name} hp={activeCharacter.hp} maxHp={activeCharacter.maxHp} />
+          <CombatTracker sessionId={Number(sessionId)} characterName={activeCharacter.name} hp={displayHp} maxHp={displayMaxHp} />
         )}
 
         {/* Tab content */}

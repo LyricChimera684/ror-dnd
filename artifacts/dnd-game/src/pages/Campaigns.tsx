@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useGetCampaigns, useJoinCampaign, useGetPlayerCharacters } from "@workspace/api-client-react";
 import { auth } from "@/lib/auth";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Map, Users, Key, Search, Globe, Clock, Trash2, Loader2 } from "lucide-react";
+import { Map, Users, Key, Search, Globe, Clock, Trash2, Loader2, Sword, Shield, Lock } from "lucide-react";
 
 function getCampaignAge(createdAt: string | Date): string {
   const created = new Date(createdAt);
@@ -23,6 +23,91 @@ function getCampaignAge(createdAt: string | Date): string {
   return `${diffWeeks}w old`;
 }
 
+type CharClass = "Barbarian" | "Bard" | "Cleric" | "Druid" | "Fighter" | "Monk" | "Paladin" | "Ranger" | "Rogue" | "Sorcerer" | "Warlock" | "Wizard" | string;
+
+function classIcon(cls: CharClass): string {
+  const icons: Record<string, string> = {
+    Barbarian: "⚔️", Bard: "🎵", Cleric: "✝️", Druid: "🌿",
+    Fighter: "🛡️", Monk: "👊", Paladin: "⚜️", Ranger: "🏹",
+    Rogue: "🗡️", Sorcerer: "✨", Warlock: "🌑", Wizard: "📚",
+  };
+  return icons[cls] ?? "⚔️";
+}
+
+// ─── Custom Character Picker ──────────────────────────────────────────────────
+interface CharPickerProps {
+  characters: Array<{ id: number; name: string; race: string; class: string; level: number; hp: number; maxHp: number; isDead: boolean }>;
+  selected: number | "";
+  onSelect: (id: number) => void;
+  lockedChars?: Record<number, { name: string; canSwap: boolean }>;
+}
+
+function CharacterPicker({ characters, selected, onSelect, lockedChars = {} }: CharPickerProps) {
+  if (characters.length === 0) {
+    return (
+      <div className="text-center text-secondary font-sans py-4">
+        You have no characters. Create one first!
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-2 max-h-72 overflow-y-auto pr-1">
+      {characters.map((c) => {
+        const isSelected = selected === c.id;
+        const hpPct = Math.max(0, Math.min(100, (c.hp / c.maxHp) * 100));
+        const hpColor = hpPct > 60 ? "from-green-800 to-green-500" : hpPct > 30 ? "from-yellow-800 to-yellow-500" : "from-red-900 to-red-500";
+
+        return (
+          <motion.button
+            key={c.id}
+            type="button"
+            onClick={() => onSelect(c.id)}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className={`w-full flex items-center gap-3 px-4 py-3 border text-left transition-all duration-200 ${
+              isSelected
+                ? "border-primary bg-primary/10 shadow-[0_0_12px_rgba(212,175,55,0.15)]"
+                : "border-border/40 bg-black/20 hover:border-primary/40 hover:bg-black/30"
+            } ${c.isDead ? "opacity-50" : ""}`}
+          >
+            <div className={`w-10 h-10 shrink-0 flex items-center justify-center text-xl border ${isSelected ? "border-primary/60 bg-primary/10" : "border-border/30 bg-black/30"}`}>
+              {c.isDead ? "💀" : classIcon(c.class)}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-display text-foreground truncate">{c.name}</span>
+                {c.isDead && <span className="text-xs text-red-400 font-display shrink-0">Fallen</span>}
+              </div>
+              <div className="text-xs text-muted-foreground font-sans">{c.race} {c.class}</div>
+              <div className="mt-1.5 flex items-center gap-2">
+                <div className="flex-1 h-1 bg-black/60 rounded-full overflow-hidden">
+                  <div className={`h-full bg-gradient-to-r ${hpColor} transition-all`} style={{ width: `${hpPct}%` }} />
+                </div>
+                <span className="text-xs text-muted-foreground shrink-0">❤ {c.hp}/{c.maxHp}</span>
+              </div>
+            </div>
+
+            <div className="shrink-0 text-right">
+              <div className={`inline-flex px-1.5 py-0.5 border text-xs font-display tracking-widest ${isSelected ? "border-primary/50 text-primary bg-primary/10" : "border-border/30 text-muted-foreground"}`}>
+                LVL {c.level}
+              </div>
+              {isSelected && (
+                <div className="mt-1">
+                  <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center mx-auto">
+                    <span className="text-background text-xs">✓</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function Campaigns() {
   const user = auth.getUser();
   const [, setLocation] = useLocation();
@@ -31,6 +116,7 @@ export default function Campaigns() {
   const [joinError, setJoinError] = useState("");
   const [joiningId, setJoiningId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [lockedCampaigns, setLockedCampaigns] = useState<Record<number, { characterName: string; canSwap: boolean }>>({});
 
   const { data: campaigns, isLoading, refetch } = useGetCampaigns({ playerId: user?.id }, {
     query: { enabled: !!user?.id }
@@ -40,9 +126,45 @@ export default function Campaigns() {
     query: { enabled: !!user?.id }
   });
 
+  // Fetch lock status for each campaign
+  useEffect(() => {
+    if (!user?.id || !campaigns?.length) return;
+    const apiBase = import.meta.env.VITE_API_URL || "";
+    Promise.all(
+      campaigns.map(async (camp) => {
+        try {
+          const resp = await fetch(`${apiBase}/api/campaigns/${camp.id}/member-stats?playerId=${user.id}`);
+          if (!resp.ok) return [camp.id, null] as const;
+          const data = await resp.json();
+          return [camp.id, { characterName: data.characterName, canSwap: data.canSwap }] as const;
+        } catch {
+          return [camp.id, null] as const;
+        }
+      })
+    ).then((results) => {
+      const map: Record<number, { characterName: string; canSwap: boolean }> = {};
+      for (const [id, info] of results) {
+        if (info) map[id] = info;
+      }
+      setLockedCampaigns(map);
+    });
+  }, [campaigns, user?.id]);
+
   const { mutate: join } = useJoinCampaign({
     mutation: {
-      onSuccess: (session) => {
+      onSuccess: (session: any) => {
+        if (session.characterLocked) {
+          setJoinError("Your adventurer is bound to this campaign. Reach a safe haven to swap.");
+          setJoiningId(null);
+          // Still enter the campaign with the locked character
+          auth.setSession({
+            sessionId: session.id,
+            campaignId: session.campaignId,
+            characterId: session.characterId,
+          });
+          setTimeout(() => setLocation(`/game/${session.id}`), 1500);
+          return;
+        }
         auth.setSession({
           sessionId: session.id,
           campaignId: session.campaignId,
@@ -59,7 +181,7 @@ export default function Campaigns() {
 
   const handleJoin = (campaignId: number, code?: string) => {
     if (!selectedCharId) {
-      setJoinError("Select a character first!");
+      setJoinError("Choose your adventurer first!");
       return;
     }
     if (!user) return;
@@ -103,26 +225,36 @@ export default function Campaigns() {
           </Button>
         </div>
 
-        {/* Character Selection for Joining */}
-        <div className="bg-primary/10 border border-primary/30 p-6 rounded-lg max-w-2xl mx-auto backdrop-blur-sm">
-          <h3 className="font-display text-xl mb-4 text-primary text-center">Active Adventurer</h3>
-          {characters?.length === 0 ? (
-            <div className="text-center text-secondary font-sans">You have no characters. Create one first!</div>
-          ) : (
-            <select
-              value={selectedCharId}
-              onChange={(e) => setSelectedCharId(e.target.value ? Number(e.target.value) : "")}
-              className="w-full bg-background border border-primary/50 px-4 py-3 text-lg font-sans text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="">-- Choose who will journey forth --</option>
-              {characters?.map(c => (
-                <option key={c.id} value={c.id} className="bg-card">
-                  {c.name} (Lvl {c.level} {c.class})
-                </option>
-              ))}
-            </select>
-          )}
-          {joinError && <div className="mt-4 text-secondary text-center font-sans italic">{joinError}</div>}
+        {/* Character Selection Panel */}
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-black/30 border border-primary/20 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Sword className="w-4 h-4 text-primary" />
+              <h3 className="font-display text-lg text-primary tracking-wide">Choose Your Adventurer</h3>
+            </div>
+            <CharacterPicker
+              characters={(characters ?? []) as any}
+              selected={selectedCharId}
+              onSelect={(id) => { setSelectedCharId(id); setJoinError(""); }}
+            />
+            {!selectedCharId && characters && characters.length > 0 && (
+              <p className="mt-3 text-xs text-muted-foreground font-sans text-center italic">
+                Select an adventurer to enter a campaign
+              </p>
+            )}
+            {joinError && (
+              <AnimatePresence>
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="mt-4 text-secondary text-sm text-center font-sans italic bg-secondary/10 border border-secondary/20 px-4 py-2"
+                >
+                  {joinError}
+                </motion.div>
+              </AnimatePresence>
+            )}
+          </div>
         </div>
 
         {isLoading ? (
@@ -133,6 +265,8 @@ export default function Campaigns() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {campaigns?.map((camp, i) => {
               const isOwner = camp.creatorId === user?.id;
+              const lockInfo = lockedCampaigns[camp.id];
+
               return (
                 <motion.div
                   key={camp.id}
@@ -143,10 +277,21 @@ export default function Campaigns() {
                 >
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-3xl text-primary">{camp.title}</h3>
-                    {camp.isPublic ?
-                      <Globe className="text-muted-foreground w-6 h-6" title="Public" /> :
-                      <Key className="text-secondary w-6 h-6" title="Private" />
-                    }
+                    <div className="flex items-center gap-1.5">
+                      {lockInfo && (
+                        <div className="flex items-center gap-1 px-2 py-0.5 border border-primary/20 bg-primary/5 text-xs font-display text-primary/70">
+                          {lockInfo.canSwap ? (
+                            <><Shield className="w-3 h-3 text-green-400" /> <span className="text-green-400">Swap available</span></>
+                          ) : (
+                            <><Lock className="w-3 h-3" /> {lockInfo.characterName}</>
+                          )}
+                        </div>
+                      )}
+                      {camp.isPublic ?
+                        <Globe className="text-muted-foreground w-5 h-5" title="Public" /> :
+                        <Key className="text-secondary w-5 h-5" title="Private" />
+                      }
+                    </div>
                   </div>
 
                   <p className="font-sans text-muted-foreground italic mb-4 flex-1">

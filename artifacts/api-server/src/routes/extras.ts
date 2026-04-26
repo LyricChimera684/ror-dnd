@@ -12,7 +12,7 @@ import {
   charactersTable,
   playersTable,
 } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import {
   GetSessionNpcsParams,
   GetSessionJournalParams,
@@ -116,16 +116,53 @@ router.get("/campaigns/:campaignId/party", async (req, res) => {
         characterName: character?.name ?? "Unknown",
         race: character?.race ?? "Unknown",
         class: character?.class ?? "Unknown",
-        level: character?.level ?? 1,
-        hp: character?.hp ?? 0,
-        maxHp: character?.maxHp ?? 20,
-        xp: character?.xp ?? 0,
-        isDead: character?.isDead ?? false,
+        level: membership.campaignLevel ?? character?.level ?? 1,
+        hp: membership.campaignHp ?? character?.hp ?? 0,
+        maxHp: membership.campaignMaxHp ?? character?.maxHp ?? 20,
+        xp: membership.campaignXp ?? character?.xp ?? 0,
+        isDead: membership.campaignIsDead ?? character?.isDead ?? false,
       };
     })
   );
 
   res.json(members);
+});
+
+router.get("/campaigns/:campaignId/member-stats", async (req, res) => {
+  const campaignId = parseInt(req.params.campaignId);
+  const playerId = parseInt(req.query.playerId as string);
+  if (!campaignId || !playerId) {
+    res.status(400).json({ error: "campaignId and playerId required" });
+    return;
+  }
+  const [member] = await db
+    .select()
+    .from(campaignMembersTable)
+    .where(and(
+      eq(campaignMembersTable.campaignId, campaignId),
+      eq(campaignMembersTable.playerId, playerId)
+    ))
+    .limit(1);
+  if (!member) {
+    res.status(404).json({ error: "Not a member of this campaign" });
+    return;
+  }
+  const [character] = await db
+    .select()
+    .from(charactersTable)
+    .where(eq(charactersTable.id, member.characterId))
+    .limit(1);
+  res.json({
+    characterId: member.characterId,
+    characterName: character?.name ?? "Unknown",
+    hp: member.campaignHp ?? character?.hp ?? 20,
+    maxHp: member.campaignMaxHp ?? character?.maxHp ?? 20,
+    level: member.campaignLevel ?? character?.level ?? 1,
+    xp: member.campaignXp ?? character?.xp ?? 0,
+    isDead: member.campaignIsDead,
+    isLocked: member.isLocked,
+    canSwap: member.canSwap,
+  });
 });
 
 router.post("/campaigns/:campaignId/dm-inject", async (req, res) => {
