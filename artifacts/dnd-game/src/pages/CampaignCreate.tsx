@@ -369,6 +369,7 @@ function CampaignForm({
   const [isPublic, setIsPublic] = useState(true);
   const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState("");
+  const [isGeneratingSynopsis, setIsGeneratingSynopsis] = useState(false);
 
   const { mutate: createCamp, isPending } = useCreateCampaign({
     mutation: {
@@ -398,6 +399,17 @@ function CampaignForm({
         ...(!isPublic ? { inviteCode } : {}),
       },
     });
+  };
+
+  const handleGenerateSynopsis = () => {
+    setIsGeneratingSynopsis(true);
+    window.setTimeout(() => {
+      const lore = setting.trim() || title.trim() || "A world on the edge of change";
+      setDescription(
+        `A band of adventurers is drawn into ${lore.toLowerCase()}. As secrets surface and rival powers close in, they must decide what kind of legends they will become.`
+      );
+      setIsGeneratingSynopsis(false);
+    }, 450);
   };
 
   return (
@@ -462,7 +474,18 @@ function CampaignForm({
           </div>
 
           <div>
-            <label className="block font-display text-xl mb-2 text-primary/90">Synopsis</label>
+            <div className="flex items-center justify-between gap-4 mb-2">
+              <label className="block font-display text-xl text-primary/90">Synopsis</label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleGenerateSynopsis}
+                disabled={isGeneratingSynopsis}
+              >
+                {isGeneratingSynopsis ? "Generating..." : "Generate Synopsis"}
+              </Button>
+            </div>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
