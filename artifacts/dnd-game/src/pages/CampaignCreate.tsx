@@ -242,7 +242,7 @@ function PresetGallery({
               onHoverStart={() => setHovered(preset.id)}
               onHoverEnd={() => setHovered(null)}
               onClick={() => onSelect(preset)}
-              className={`relative flex flex-col text-left p-5 bg-gradient-to-br border transition-all duration-300 cursor-pointer group ${preset.accentColor}`}
+              className={`relative flex flex-col text-left p-5 bg-background border border-primary/60 transition-all duration-300 cursor-pointer group ${preset.accentColor}`}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="text-primary/80 group-hover:text-primary transition-colors">
