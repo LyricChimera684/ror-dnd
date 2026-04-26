@@ -181,7 +181,7 @@ const PRESETS: CampaignPreset[] = [
 
 // ─── Mode Picker ──────────────────────────────────────────────────────────────
 
-function ModePicker({ onSelect }: { onSelect: (mode: "preset" | "diy") => void }) {
+function ModePicker({ onSelect }: { onSelect: (mode: "preset" | "diy" | "synopsis") => void }) {
   return (
     <motion.div
       key="mode"
@@ -195,7 +195,7 @@ function ModePicker({ onSelect }: { onSelect: (mode: "preset" | "diy") => void }
         <p className="font-sans text-muted-foreground italic mb-10">
           Take on the mantle of the Dungeon Master.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
@@ -226,6 +226,23 @@ function ModePicker({ onSelect }: { onSelect: (mode: "preset" | "diy") => void }
               <div className="font-display text-xl text-primary mb-1">Build Your Own</div>
               <div className="font-sans text-sm text-muted-foreground">
                 Craft your world from scratch — your story, your rules.
+              </div>
+            </div>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => onSelect("synopsis")}
+            className="group flex flex-col items-center gap-4 p-8 bg-primary/10 border border-border hover:border-primary/60 hover:bg-primary/20 transition-all duration-300 cursor-pointer text-left"
+          >
+            <div className="w-16 h-16 flex items-center justify-center border border-primary/40 bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+              <Wand2 className="w-8 h-8" />
+            </div>
+            <div>
+              <div className="font-display text-xl text-primary mb-1">Generate Synopsis</div>
+              <div className="font-sans text-sm text-muted-foreground">
+                Create a world concept and story hook with one quick prompt.
               </div>
             </div>
           </motion.button>
