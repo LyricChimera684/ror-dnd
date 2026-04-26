@@ -127,35 +127,34 @@ export default function Dashboard() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-card border-ornate p-6 relative group overflow-hidden"
+                  className="bg-card border border-border/50 rounded-xl p-6 relative group overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:border-primary/30 hover:shadow-[0_14px_38px_rgba(0,0,0,0.28)] transition-all duration-300"
                 >
-                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="relative z-10">
                     {char.isDead && (
-                      <div className="absolute top-0 right-0 text-xs font-display text-red-400 bg-red-950/60 border border-red-800/40 px-2 py-0.5 rounded-bl">
+                      <div className="absolute top-0 right-0 text-xs font-display text-red-300 bg-red-950/70 border-l border-b border-red-800/40 px-2 py-0.5 rounded-bl-md">
                         💀 Fallen
                       </div>
                     )}
-                    <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-2xl text-primary">{char.name}</h3>
-                      <span className="font-display font-bold text-2xl opacity-50 text-muted-foreground">Lvl {char.level}</span>
+                    <div className="flex justify-between items-start gap-3 mb-4">
+                      <div className="min-w-0">
+                        <h3 className="text-2xl text-primary truncate">{char.name}</h3>
+                        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground/80 font-display mt-1">
+                          {char.race} · {char.class}
+                        </p>
+                      </div>
+                      <span className="shrink-0 inline-flex items-center justify-center min-w-16 h-10 px-3 rounded-full border border-primary/25 bg-primary/10 font-display font-bold text-sm text-primary">
+                        Lv {char.level}
+                      </span>
                     </div>
-                    <div className="space-y-2 font-sans text-lg mb-4">
-                      <div className="flex justify-between border-b border-border/30 pb-1">
-                        <span className="text-muted-foreground">Race</span>
-                        <span>{char.race}</span>
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="rounded-lg border border-border/30 bg-black/20 px-3 py-2">
+                        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-display">HP</div>
+                        <div className="mt-1 text-sm text-secondary font-bold">{char.hp} / {char.maxHp}</div>
                       </div>
-                      <div className="flex justify-between border-b border-border/30 pb-1">
-                        <span className="text-muted-foreground">Class</span>
-                        <span>{char.class}</span>
-                      </div>
-                      <div className="flex justify-between border-b border-border/30 pb-1">
-                        <span className="text-muted-foreground">HP</span>
-                        <span className="text-secondary font-bold">{char.hp} / {char.maxHp}</span>
-                      </div>
-                      <div className="flex justify-between pb-1">
-                        <span className="text-muted-foreground">XP</span>
-                        <span className="text-primary">{char.xp}</span>
+                      <div className="rounded-lg border border-border/30 bg-black/20 px-3 py-2">
+                        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-display">XP</div>
+                        <div className="mt-1 text-sm text-primary font-bold">{char.xp}</div>
                       </div>
                     </div>
                     {/* Ability Scores toggle */}
@@ -163,7 +162,7 @@ export default function Dashboard() {
                       <div className="mt-3">
                         <button
                           onClick={() => setExpandedStatsId(expandedStatsId === char.id ? null : char.id)}
-                          className="w-full flex items-center justify-between text-xs font-display text-muted-foreground hover:text-primary transition-colors py-1 border-t border-border/30 pt-2"
+                          className="w-full flex items-center justify-between text-xs font-display text-muted-foreground hover:text-primary transition-colors py-2 border-t border-border/30"
                         >
                           <span className="flex items-center gap-1.5"><Swords className="w-3 h-3" /> Ability Scores</span>
                           {expandedStatsId === char.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -195,7 +194,7 @@ export default function Dashboard() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="w-full text-red-400 hover:text-red-300 hover:bg-red-950/30 justify-center gap-2"
+                        className="w-full justify-center gap-2 rounded-lg border border-red-900/30 bg-red-950/10 text-red-300 hover:bg-red-950/30 hover:text-red-100"
                         onClick={() => handleDeleteCharacter(char.id)}
                         disabled={deletingCharId === char.id}
                       >
