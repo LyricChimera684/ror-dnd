@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { useGetPlayerCharacters, useGetAchievements } from "@workspace/api-client-react";
@@ -28,6 +29,12 @@ function CharacterAchievements({ characterId }: { characterId: number }) {
 export default function Dashboard() {
   const user = auth.getUser();
   const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (user?.role === "admin") {
+      setLocation("/admin");
+    }
+  }, [user?.role]);
 
   const { data: characters, isLoading } = useGetPlayerCharacters(user?.id || 0, {
     query: { enabled: !!user?.id }

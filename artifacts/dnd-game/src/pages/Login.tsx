@@ -35,8 +35,9 @@ export default function Login() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to sign in.");
-      auth.setUser({ id: data.id, username: data.username, role: String(data.role ?? "").toLowerCase() });
-      setLocation("/dashboard");
+      const role = String(data.role ?? "").toLowerCase();
+      auth.setUser({ id: data.id, username: data.username, role });
+      setLocation(role === "admin" ? "/admin" : "/dashboard");
     } catch (err: any) {
       setError(err.message);
     } finally {
