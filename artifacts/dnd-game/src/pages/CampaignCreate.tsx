@@ -478,10 +478,10 @@ function CampaignForm({
               <label className="block font-display text-xl text-primary/90">Synopsis</label>
               <Button
                 type="button"
-                variant="outline"
-                size="sm"
+                variant="ghost"
                 onClick={handleGenerateSynopsis}
                 disabled={isGeneratingSynopsis}
+                className="h-auto px-0 py-0 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-primary"
               >
                 {isGeneratingSynopsis ? "Generating..." : "Generate Synopsis"}
               </Button>
