@@ -258,7 +258,7 @@ html:not([data-theme]) body {
       hsl(43 70% 28% / 0.88) 0%,
       hsl(30 35% 12% / 0.72) 35%,
       hsl(30 15% 8% / 1)  100%),
-    url('/images/bg-stone.png') !important;
+    url('/images/bg-parchment.png') !important;
   background-size: auto, cover !important;
   background-position: center, center center !important;
   background-attachment: fixed, fixed !important;
