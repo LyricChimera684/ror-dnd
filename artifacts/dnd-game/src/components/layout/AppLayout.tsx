@@ -152,7 +152,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               )}
               <div className="mt-2 pt-3 border-t border-border/30 flex items-center gap-2 sm:hidden">
                 <SoundToggle />
-                <ThemeMenu />
+                <ThemeMenu align="left" />
                 <button
                   onClick={() => { sound.click(); handleLogout(); }}
                   className="ml-auto flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-secondary text-sm font-display tracking-widest"
