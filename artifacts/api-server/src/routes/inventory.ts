@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, inventoryItemsTable, charactersTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, inventoryItemsTable, charactersTable, campaignsTable } from "@workspace/db";
+import { and, eq } from "drizzle-orm";
 import {
   GetInventoryParams,
   AddInventoryItemParams,
@@ -10,18 +10,27 @@ import {
 
 const router: IRouter = Router();
 
-router.get("/characters/:characterId/inventory", async (req, res) => {
-  const { characterId } = GetInventoryParams.parse({ characterId: req.params.characterId });
+router.get("/campaigns/:campaignId/characters/:characterId/inventory", async (req, res) => {
+  const { campaignId, characterId } = GetInventoryParams.parse({
+    campaignId: req.params.campaignId,
+    characterId: req.params.characterId,
+  });
   const items = await db
     .select()
     .from(inventoryItemsTable)
-    .where(eq(inventoryItemsTable.characterId, characterId))
+    .where(and(
+      eq(inventoryItemsTable.characterId, characterId),
+      eq(inventoryItemsTable.campaignId, campaignId),
+    ))
     .orderBy(inventoryItemsTable.createdAt);
   res.json(items);
 });
 
-router.post("/characters/:characterId/inventory", async (req, res) => {
-  const { characterId } = AddInventoryItemParams.parse({ characterId: req.params.characterId });
+router.post("/campaigns/:campaignId/characters/:characterId/inventory", async (req, res) => {
+  const { campaignId, characterId } = AddInventoryItemParams.parse({
+    campaignId: req.params.campaignId,
+    characterId: req.params.characterId,
+  });
   const body = AddInventoryItemBody.parse(req.body);
 
   const [char] = await db.select().from(charactersTable).where(eq(charactersTable.id, characterId)).limit(1);
@@ -29,11 +38,17 @@ router.post("/characters/:characterId/inventory", async (req, res) => {
     res.status(404).json({ error: "Character not found" });
     return;
   }
+  const [camp] = await db.select().from(campaignsTable).where(eq(campaignsTable.id, campaignId)).limit(1);
+  if (!camp) {
+    res.status(404).json({ error: "Campaign not found" });
+    return;
+  }
 
   const [item] = await db
     .insert(inventoryItemsTable)
     .values({
       characterId,
+      campaignId,
       name: body.name,
       description: body.description ?? null,
       type: body.type,
@@ -44,15 +59,20 @@ router.post("/characters/:characterId/inventory", async (req, res) => {
   res.status(201).json(item);
 });
 
-router.delete("/characters/:characterId/inventory/:itemId", async (req, res) => {
-  const { characterId, itemId } = RemoveInventoryItemParams.parse({
+router.delete("/campaigns/:campaignId/characters/:characterId/inventory/:itemId", async (req, res) => {
+  const { campaignId, characterId, itemId } = RemoveInventoryItemParams.parse({
+    campaignId: req.params.campaignId,
     characterId: req.params.characterId,
     itemId: req.params.itemId,
   });
 
   await db
     .delete(inventoryItemsTable)
-    .where(eq(inventoryItemsTable.id, itemId));
+    .where(and(
+      eq(inventoryItemsTable.id, itemId),
+      eq(inventoryItemsTable.characterId, characterId),
+      eq(inventoryItemsTable.campaignId, campaignId),
+    ));
 
   res.json({ success: true, message: "Item removed" });
 });

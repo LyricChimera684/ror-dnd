@@ -182,15 +182,18 @@ async function updateNpcs(sessionId: number, narrative: string) {
   return newNpcs;
 }
 
-async function parseAndAddItems(characterId: number, narrative: string) {
+async function parseAndAddItems(characterId: number, campaignId: number, narrative: string) {
   const itemMatches = [...narrative.matchAll(/\[ITEM:([^:]+):([^:]+):([^\]]+)\]/g)];
   if (itemMatches.length === 0) return [];
 
-  // Fetch character's existing inventory once so we can stack same-named items
+  // Fetch character's existing inventory for THIS campaign so we can stack same-named items
   const existing = await db
     .select()
     .from(inventoryItemsTable)
-    .where(eq(inventoryItemsTable.characterId, characterId));
+    .where(and(
+      eq(inventoryItemsTable.characterId, characterId),
+      eq(inventoryItemsTable.campaignId, campaignId),
+    ));
   const existingByName = new Map(existing.map((it) => [it.name.toLowerCase(), it]));
 
   // Dedupe matches within this response by lowercased name (count occurrences for stack qty)
@@ -221,7 +224,7 @@ async function parseAndAddItems(characterId: number, narrative: string) {
     } else {
       const [item] = await db
         .insert(inventoryItemsTable)
-        .values({ characterId, name: w.name, description: w.description, type: w.type, quantity: w.qty })
+        .values({ characterId, campaignId, name: w.name, description: w.description, type: w.type, quantity: w.qty })
         .returning();
       newItems.push(item);
     }
@@ -597,7 +600,7 @@ LENGTH: 3-4 sentences maximum. No flowery prose, no compliments, just story.`;
 
     const [journalTask, itemsTask, achievementsTask] = await Promise.all([
       maybeGenerateJournalEntry(sessionId, actionCount + 1),
-      parseAndAddItems(character.id, rawResponse),
+      parseAndAddItems(character.id, session.campaignId, rawResponse),
       checkAndAwardAchievements(character.playerId, newLevel, actionCount + 1, newXp, leveledUp, isDead),
     ]);
 

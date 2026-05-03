@@ -9,6 +9,7 @@
 export interface InventoryItem {
   id: number;
   characterId: number;
+  campaignId: number;
   name: string;
   description?: string;
   type: string;

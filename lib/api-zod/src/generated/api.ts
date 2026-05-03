@@ -101,15 +101,17 @@ export const ValidateCharacterResponse = zod.object({
 });
 
 /**
- * @summary Get character inventory
+ * @summary Get character inventory for a campaign
  */
 export const GetInventoryParams = zod.object({
+  campaignId: zod.coerce.number(),
   characterId: zod.coerce.number(),
 });
 
 export const GetInventoryResponseItem = zod.object({
   id: zod.number(),
   characterId: zod.number(),
+  campaignId: zod.number(),
   name: zod.string(),
   description: zod.string().optional(),
   type: zod.string(),
@@ -119,9 +121,10 @@ export const GetInventoryResponseItem = zod.object({
 export const GetInventoryResponse = zod.array(GetInventoryResponseItem);
 
 /**
- * @summary Add item to inventory
+ * @summary Add item to a character's campaign inventory
  */
 export const AddInventoryItemParams = zod.object({
+  campaignId: zod.coerce.number(),
   characterId: zod.coerce.number(),
 });
 
@@ -133,9 +136,10 @@ export const AddInventoryItemBody = zod.object({
 });
 
 /**
- * @summary Remove/use item from inventory
+ * @summary Remove/use item from a character's campaign inventory
  */
 export const RemoveInventoryItemParams = zod.object({
+  campaignId: zod.coerce.number(),
   characterId: zod.coerce.number(),
   itemId: zod.coerce.number(),
 });
@@ -341,6 +345,7 @@ export const PerformActionResponse = zod.object({
       zod.object({
         id: zod.number(),
         characterId: zod.number(),
+        campaignId: zod.number(),
         name: zod.string(),
         description: zod.string().optional(),
         type: zod.string(),

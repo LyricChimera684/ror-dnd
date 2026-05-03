@@ -133,12 +133,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ValidateCharacterResponse"
 
-  /characters/{characterId}/inventory:
+  /campaigns/{campaignId}/characters/{characterId}/inventory:
     get:
       operationId: getInventory
       tags: [players]
-      summary: Get character inventory
+      summary: Get character inventory for a campaign
       parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
         - name: characterId
           in: path
           required: true
@@ -156,8 +161,13 @@ paths:
     post:
       operationId: addInventoryItem
       tags: [players]
-      summary: Add item to inventory
+      summary: Add item to a character's campaign inventory
       parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
         - name: characterId
           in: path
           required: true
@@ -177,12 +187,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/InventoryItem"
 
-  /characters/{characterId}/inventory/{itemId}:
+  /campaigns/{campaignId}/characters/{characterId}/inventory/{itemId}:
     delete:
       operationId: removeInventoryItem
       tags: [players]
-      summary: Remove/use item from inventory
+      summary: Remove/use item from a character's campaign inventory
       parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
         - name: characterId
           in: path
           required: true
@@ -688,6 +703,8 @@ components:
           type: integer
         characterId:
           type: integer
+        campaignId:
+          type: integer
         name:
           type: string
         description:
@@ -699,7 +716,7 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, characterId, name, type, quantity, createdAt]
+      required: [id, characterId, campaignId, name, type, quantity, createdAt]
 
     AddInventoryItemRequest:
       type: object

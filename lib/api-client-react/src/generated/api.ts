@@ -571,30 +571,40 @@ export const useValidateCharacter = <
 };
 
 /**
- * @summary Get character inventory
+ * @summary Get character inventory for a campaign
  */
-export const getGetInventoryUrl = (characterId: number) => {
-  return `/api/characters/${characterId}/inventory`;
+export const getGetInventoryUrl = (campaignId: number, characterId: number) => {
+  return `/api/campaigns/${campaignId}/characters/${characterId}/inventory`;
 };
 
 export const getInventory = async (
+  campaignId: number,
   characterId: number,
   options?: RequestInit,
 ): Promise<InventoryItem[]> => {
-  return customFetch<InventoryItem[]>(getGetInventoryUrl(characterId), {
-    ...options,
-    method: "GET",
-  });
+  return customFetch<InventoryItem[]>(
+    getGetInventoryUrl(campaignId, characterId),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
 };
 
-export const getGetInventoryQueryKey = (characterId: number) => {
-  return [`/api/characters/${characterId}/inventory`] as const;
+export const getGetInventoryQueryKey = (
+  campaignId: number,
+  characterId: number,
+) => {
+  return [
+    `/api/campaigns/${campaignId}/characters/${characterId}/inventory`,
+  ] as const;
 };
 
 export const getGetInventoryQueryOptions = <
   TData = Awaited<ReturnType<typeof getInventory>>,
   TError = ErrorType<unknown>,
 >(
+  campaignId: number,
   characterId: number,
   options?: {
     query?: UseQueryOptions<
@@ -608,16 +618,16 @@ export const getGetInventoryQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetInventoryQueryKey(characterId);
+    queryOptions?.queryKey ?? getGetInventoryQueryKey(campaignId, characterId);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getInventory>>> = ({
     signal,
-  }) => getInventory(characterId, { signal, ...requestOptions });
+  }) => getInventory(campaignId, characterId, { signal, ...requestOptions });
 
   return {
     queryKey,
     queryFn,
-    enabled: !!characterId,
+    enabled: !!(campaignId && characterId),
     ...queryOptions,
   } as UseQueryOptions<
     Awaited<ReturnType<typeof getInventory>>,
@@ -632,13 +642,14 @@ export type GetInventoryQueryResult = NonNullable<
 export type GetInventoryQueryError = ErrorType<unknown>;
 
 /**
- * @summary Get character inventory
+ * @summary Get character inventory for a campaign
  */
 
 export function useGetInventory<
   TData = Awaited<ReturnType<typeof getInventory>>,
   TError = ErrorType<unknown>,
 >(
+  campaignId: number,
   characterId: number,
   options?: {
     query?: UseQueryOptions<
@@ -649,7 +660,11 @@ export function useGetInventory<
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetInventoryQueryOptions(characterId, options);
+  const queryOptions = getGetInventoryQueryOptions(
+    campaignId,
+    characterId,
+    options,
+  );
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -659,23 +674,30 @@ export function useGetInventory<
 }
 
 /**
- * @summary Add item to inventory
+ * @summary Add item to a character's campaign inventory
  */
-export const getAddInventoryItemUrl = (characterId: number) => {
-  return `/api/characters/${characterId}/inventory`;
+export const getAddInventoryItemUrl = (
+  campaignId: number,
+  characterId: number,
+) => {
+  return `/api/campaigns/${campaignId}/characters/${characterId}/inventory`;
 };
 
 export const addInventoryItem = async (
+  campaignId: number,
   characterId: number,
   addInventoryItemRequest: AddInventoryItemRequest,
   options?: RequestInit,
 ): Promise<InventoryItem> => {
-  return customFetch<InventoryItem>(getAddInventoryItemUrl(characterId), {
-    ...options,
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(addInventoryItemRequest),
-  });
+  return customFetch<InventoryItem>(
+    getAddInventoryItemUrl(campaignId, characterId),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(addInventoryItemRequest),
+    },
+  );
 };
 
 export const getAddInventoryItemMutationOptions = <
@@ -685,14 +707,22 @@ export const getAddInventoryItemMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof addInventoryItem>>,
     TError,
-    { characterId: number; data: BodyType<AddInventoryItemRequest> },
+    {
+      campaignId: number;
+      characterId: number;
+      data: BodyType<AddInventoryItemRequest>;
+    },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof addInventoryItem>>,
   TError,
-  { characterId: number; data: BodyType<AddInventoryItemRequest> },
+  {
+    campaignId: number;
+    characterId: number;
+    data: BodyType<AddInventoryItemRequest>;
+  },
   TContext
 > => {
   const mutationKey = ["addInventoryItem"];
@@ -706,11 +736,15 @@ export const getAddInventoryItemMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof addInventoryItem>>,
-    { characterId: number; data: BodyType<AddInventoryItemRequest> }
+    {
+      campaignId: number;
+      characterId: number;
+      data: BodyType<AddInventoryItemRequest>;
+    }
   > = (props) => {
-    const { characterId, data } = props ?? {};
+    const { campaignId, characterId, data } = props ?? {};
 
-    return addInventoryItem(characterId, data, requestOptions);
+    return addInventoryItem(campaignId, characterId, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -723,7 +757,7 @@ export type AddInventoryItemMutationBody = BodyType<AddInventoryItemRequest>;
 export type AddInventoryItemMutationError = ErrorType<unknown>;
 
 /**
- * @summary Add item to inventory
+ * @summary Add item to a character's campaign inventory
  */
 export const useAddInventoryItem = <
   TError = ErrorType<unknown>,
@@ -732,36 +766,46 @@ export const useAddInventoryItem = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof addInventoryItem>>,
     TError,
-    { characterId: number; data: BodyType<AddInventoryItemRequest> },
+    {
+      campaignId: number;
+      characterId: number;
+      data: BodyType<AddInventoryItemRequest>;
+    },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof addInventoryItem>>,
   TError,
-  { characterId: number; data: BodyType<AddInventoryItemRequest> },
+  {
+    campaignId: number;
+    characterId: number;
+    data: BodyType<AddInventoryItemRequest>;
+  },
   TContext
 > => {
   return useMutation(getAddInventoryItemMutationOptions(options));
 };
 
 /**
- * @summary Remove/use item from inventory
+ * @summary Remove/use item from a character's campaign inventory
  */
 export const getRemoveInventoryItemUrl = (
+  campaignId: number,
   characterId: number,
   itemId: number,
 ) => {
-  return `/api/characters/${characterId}/inventory/${itemId}`;
+  return `/api/campaigns/${campaignId}/characters/${characterId}/inventory/${itemId}`;
 };
 
 export const removeInventoryItem = async (
+  campaignId: number,
   characterId: number,
   itemId: number,
   options?: RequestInit,
 ): Promise<SuccessResponse> => {
   return customFetch<SuccessResponse>(
-    getRemoveInventoryItemUrl(characterId, itemId),
+    getRemoveInventoryItemUrl(campaignId, characterId, itemId),
     {
       ...options,
       method: "DELETE",
@@ -776,14 +820,14 @@ export const getRemoveInventoryItemMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof removeInventoryItem>>,
     TError,
-    { characterId: number; itemId: number },
+    { campaignId: number; characterId: number; itemId: number },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof removeInventoryItem>>,
   TError,
-  { characterId: number; itemId: number },
+  { campaignId: number; characterId: number; itemId: number },
   TContext
 > => {
   const mutationKey = ["removeInventoryItem"];
@@ -797,11 +841,11 @@ export const getRemoveInventoryItemMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof removeInventoryItem>>,
-    { characterId: number; itemId: number }
+    { campaignId: number; characterId: number; itemId: number }
   > = (props) => {
-    const { characterId, itemId } = props ?? {};
+    const { campaignId, characterId, itemId } = props ?? {};
 
-    return removeInventoryItem(characterId, itemId, requestOptions);
+    return removeInventoryItem(campaignId, characterId, itemId, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -814,7 +858,7 @@ export type RemoveInventoryItemMutationResult = NonNullable<
 export type RemoveInventoryItemMutationError = ErrorType<unknown>;
 
 /**
- * @summary Remove/use item from inventory
+ * @summary Remove/use item from a character's campaign inventory
  */
 export const useRemoveInventoryItem = <
   TError = ErrorType<unknown>,
@@ -823,14 +867,14 @@ export const useRemoveInventoryItem = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof removeInventoryItem>>,
     TError,
-    { characterId: number; itemId: number },
+    { campaignId: number; characterId: number; itemId: number },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof removeInventoryItem>>,
   TError,
-  { characterId: number; itemId: number },
+  { campaignId: number; characterId: number; itemId: number },
   TContext
 > => {
   return useMutation(getRemoveInventoryItemMutationOptions(options));

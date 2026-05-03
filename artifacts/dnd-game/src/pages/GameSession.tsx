@@ -348,11 +348,12 @@ function DiscussionTab({ campaignId }: { campaignId: number }) {
 }
 
 // ─── Adventurer's Pack (Inventory) ───────────────────────────────────────────
-function AdventurersPackPanel({ characterId }: { characterId: number }) {
+function AdventurersPackPanel({ characterId, campaignId }: { characterId: number; campaignId: number }) {
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ name: "", description: "", type: "misc", quantity: "1" });
 
-  const { data: items, refetch } = useGetInventory(characterId, { query: { queryKey: getGetInventoryQueryKey(characterId), enabled: !!characterId } });
+  const enabled = !!characterId && !!campaignId;
+  const { data: items, refetch } = useGetInventory(campaignId, characterId, { query: { queryKey: getGetInventoryQueryKey(campaignId, characterId), enabled } });
   const { mutate: addItem, isPending: adding_ } = useAddInventoryItem({
     mutation: {
       onSuccess: () => {
@@ -363,6 +364,14 @@ function AdventurersPackPanel({ characterId }: { characterId: number }) {
     },
   });
   const { mutate: removeItem } = useRemoveInventoryItem({ mutation: { onSuccess: () => refetch() } });
+
+  const onAdd = () =>
+    addItem({
+      campaignId,
+      characterId,
+      data: { name: form.name, description: form.description, type: form.type, quantity: parseInt(form.quantity) || 1 },
+    });
+  const onRemove = (itemId: number) => removeItem({ campaignId, characterId, itemId });
 
   const typeIcon: Record<string, string> = { weapon: "⚔️", armor: "🛡️", potion: "🧪", quest: "📜", misc: "📦" };
 
@@ -382,7 +391,7 @@ function AdventurersPackPanel({ characterId }: { characterId: number }) {
               <span className="flex-1 text-foreground/80 truncate">{item.name}</span>
               <span className="text-muted-foreground shrink-0">x{item.quantity}</span>
               <button
-                onClick={() => removeItem({ characterId, itemId: item.id })}
+                onClick={() => onRemove(item.id)}
                 className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-400 transition-opacity"
               >
                 <Trash2 className="w-3 h-3" />
@@ -413,12 +422,7 @@ function AdventurersPackPanel({ characterId }: { characterId: number }) {
                   size="sm"
                   className="h-7 flex-1 text-xs"
                   disabled={!form.name.trim() || adding_}
-                  onClick={() =>
-                    addItem({
-                      characterId,
-                      data: { name: form.name, description: form.description, type: form.type, quantity: parseInt(form.quantity) || 1 },
-                    })
-                  }
+                  onClick={onAdd}
                 >
                   Add
                 </Button>
@@ -739,7 +743,7 @@ export default function GameSession() {
                   <p className="text-muted-foreground italic text-xs leading-relaxed">{activeCharacter.backstory}</p>
                 </div>
               )}
-              <AdventurersPackPanel characterId={activeCharacter.id} />
+              <AdventurersPackPanel characterId={activeCharacter.id} campaignId={session?.campaignId ?? 0} />
             </div>
           </div>
         ) : (
