@@ -519,16 +519,17 @@ function CampaignForm({
             </div>
           )}
 
-          <div className="pt-4 flex gap-4">
+          <div className="pt-4 flex flex-col-reverse sm:flex-row gap-3">
             <Button
               type="button"
               variant="ghost"
-              className="flex-1"
+              size="md"
+              className="w-full sm:flex-1"
               onClick={() => setLocation("/campaigns")}
             >
               Cancel
             </Button>
-            <Button type="submit" size="lg" className="flex-1" disabled={isPending}>
+            <Button type="submit" size="md" className="w-full sm:flex-1" disabled={isPending}>
               {isPending ? "Manifesting Realm..." : "Create Campaign"}
             </Button>
           </div>
