@@ -66,7 +66,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center relative overflow-x-hidden py-8 px-4">
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-x-hidden py-4 px-4">
       <div
         className="absolute inset-0 z-0 opacity-40 bg-cover bg-center"
         style={{ backgroundImage: `url(${import.meta.env.BASE_URL}images/hero-dungeon.png)` }}
@@ -79,14 +79,14 @@ export default function Signup() {
         transition={{ duration: 0.8 }}
         className="relative z-10 w-full max-w-md"
       >
-        <div className="text-center mb-10">
-          <Swords className="w-16 h-16 mx-auto text-primary mb-4 drop-shadow-[0_0_15px_rgba(212,175,55,0.5)]" />
-          <h1 className="text-5xl md:text-6xl text-primary text-glow mb-2">Realms of Replit</h1>
-          <p className="text-xl font-sans italic text-muted-foreground">Begin Your Legend</p>
+        <div className="text-center mb-3 sm:mb-8">
+          <Swords className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-primary mb-1 sm:mb-4 drop-shadow-[0_0_15px_rgba(212,175,55,0.5)]" />
+          <h1 className="text-3xl sm:text-5xl md:text-6xl text-primary text-glow mb-0.5 sm:mb-2">Realms of Replit</h1>
+          <p className="text-sm sm:text-xl font-sans italic text-muted-foreground">Begin Your Legend</p>
         </div>
 
-        <div className="bg-card/80 backdrop-blur-xl border-ornate p-7 sm:p-8 shadow-2xl space-y-5">
-          <h2 className="text-2xl text-center">Forge Your Account</h2>
+        <div className="bg-card/80 backdrop-blur-xl border-ornate p-4 sm:p-8 shadow-2xl space-y-3 sm:space-y-5">
+          <h2 className="text-lg sm:text-2xl text-center">Forge Your Account</h2>
 
           <button
             type="button"
@@ -108,7 +108,7 @@ export default function Signup() {
             <div className="flex-1 h-px bg-border/40" />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-4">
             <div>
               <label className="block font-sans font-semibold text-sm text-muted-foreground mb-1.5">Adventurer's Name</label>
               <Input
