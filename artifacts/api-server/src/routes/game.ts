@@ -119,34 +119,74 @@ async function updateWorldMap(sessionId: number, narrative: string) {
 
 async function updateNpcs(sessionId: number, narrative: string) {
   const npcMatches = [...narrative.matchAll(/\[NPC:([^:]+):([^:]+):([^\]]+)\]/g)];
+  if (npcMatches.length === 0) return [];
+
+  // Fetch existing NPCs ONCE up front, not per-match (avoids race + saves queries)
+  const existing = await db.select().from(npcsTable).where(eq(npcsTable.sessionId, sessionId));
+  const knownNames = new Set(existing.map((n) => n.name.toLowerCase()));
   const newNpcs = [];
+  const seenInThisResponse = new Set<string>();
 
   for (const match of npcMatches) {
-    const [, name, description, disposition] = match;
-    const existing = await db.select().from(npcsTable).where(eq(npcsTable.sessionId, sessionId));
-    const alreadyKnown = existing.some((n) => n.name.toLowerCase() === name.trim().toLowerCase());
-    if (!alreadyKnown) {
-      const [npc] = await db
-        .insert(npcsTable)
-        .values({ sessionId, name: name.trim(), description: description.trim(), disposition: disposition.trim() })
-        .returning();
-      newNpcs.push(npc);
-    }
+    const [, rawName, description, disposition] = match;
+    const name = rawName.trim();
+    const lower = name.toLowerCase();
+    // Skip if already in DB OR already inserted earlier in this same response
+    if (knownNames.has(lower) || seenInThisResponse.has(lower)) continue;
+    seenInThisResponse.add(lower);
+
+    const [npc] = await db
+      .insert(npcsTable)
+      .values({ sessionId, name, description: description.trim(), disposition: disposition.trim() })
+      .returning();
+    newNpcs.push(npc);
   }
   return newNpcs;
 }
 
 async function parseAndAddItems(characterId: number, narrative: string) {
   const itemMatches = [...narrative.matchAll(/\[ITEM:([^:]+):([^:]+):([^\]]+)\]/g)];
-  const newItems = [];
+  if (itemMatches.length === 0) return [];
 
+  // Fetch character's existing inventory once so we can stack same-named items
+  const existing = await db
+    .select()
+    .from(inventoryItemsTable)
+    .where(eq(inventoryItemsTable.characterId, characterId));
+  const existingByName = new Map(existing.map((it) => [it.name.toLowerCase(), it]));
+
+  // Dedupe matches within this response by lowercased name (count occurrences for stack qty)
+  const wanted = new Map<string, { name: string; description: string; type: string; qty: number }>();
   for (const match of itemMatches) {
-    const [, name, description, type] = match;
-    const [item] = await db
-      .insert(inventoryItemsTable)
-      .values({ characterId, name: name.trim(), description: description.trim(), type: type.trim(), quantity: 1 })
-      .returning();
-    newItems.push(item);
+    const [, rawName, description, type] = match;
+    const name = rawName.trim();
+    const key = name.toLowerCase();
+    const prev = wanted.get(key);
+    if (prev) {
+      prev.qty += 1;
+    } else {
+      wanted.set(key, { name, description: description.trim(), type: type.trim(), qty: 1 });
+    }
+  }
+
+  const newItems = [];
+  for (const [key, w] of wanted) {
+    const existingItem = existingByName.get(key);
+    if (existingItem) {
+      // Already have this item — increment quantity instead of creating a duplicate row
+      const [updated] = await db
+        .update(inventoryItemsTable)
+        .set({ quantity: (existingItem.quantity ?? 1) + w.qty })
+        .where(eq(inventoryItemsTable.id, existingItem.id))
+        .returning();
+      newItems.push(updated);
+    } else {
+      const [item] = await db
+        .insert(inventoryItemsTable)
+        .values({ characterId, name: w.name, description: w.description, type: w.type, quantity: w.qty })
+        .returning();
+      newItems.push(item);
+    }
   }
   return newItems;
 }
@@ -482,11 +522,17 @@ LENGTH: 3-4 sentences maximum. No flowery prose, no compliments, just story.`;
     const prevLevel = effectiveLevel;
     const newXp = effectiveXp + xpGained;
     const newLevel = Math.floor(newXp / 100) + 1;
-    const newMaxHp = newLevel * 20;
-    const rawNewHp = effectiveHp + hpChange;
-    const newHp = Math.max(0, Math.min(newMaxHp, rawNewHp));
-    isDead = rawNewHp <= 0;
+    // Never decrease maxHp below the character's existing value (preserves class/CON bonuses)
+    const baselineMaxHp = Math.max(effectiveMaxHp, newLevel * 20);
     const leveledUp = newLevel > prevLevel;
+    // On level-up, grant +5 maxHp per level gained AND heal to full as a reward
+    const newMaxHp = leveledUp
+      ? baselineMaxHp + (newLevel - prevLevel) * 5
+      : baselineMaxHp;
+    const rawNewHp = effectiveHp + hpChange;
+    const cappedHp = Math.max(0, Math.min(newMaxHp, rawNewHp));
+    const newHp = leveledUp ? newMaxHp : cappedHp;
+    isDead = rawNewHp <= 0;
 
     updatedCampaignStats = { hp: newHp, maxHp: newMaxHp, level: newLevel, xp: newXp };
 
