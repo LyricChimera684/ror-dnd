@@ -81,7 +81,7 @@ function AchievementToast({ achievements, onDismiss }: { achievements: Array<{ t
         className="fixed top-4 right-4 z-50 space-y-2"
       >
         {achievements.map((a, i) => (
-          <div key={i} className="bg-card border-2 border-primary/60 rounded-xl p-4 shadow-[0_0_20px_rgba(212,175,55,0.3)] flex items-center gap-3 min-w-[280px]">
+          <div key={i} className="bg-card border-2 border-primary/60 rounded-xl p-4 shadow-[0_0_20px_rgba(212,175,55,0.3)] flex items-center gap-3 w-[min(280px,calc(100vw-2rem))]">
             <span className="text-3xl">{a.icon}</span>
             <div>
               <div className="font-display text-primary text-sm tracking-wide">Achievement Unlocked!</div>
@@ -749,10 +749,22 @@ export default function GameSession() {
               </button>
             ))}
           </div>
-          <div className="lg:hidden text-right shrink-0">
-            <div className="text-xs text-primary font-display">{activeCharacter?.name}</div>
-            <div className="text-xs text-muted-foreground">❤ {displayHp}/{displayMaxHp}</div>
-          </div>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden flex items-center gap-2 shrink-0 bg-black/40 border border-border/50 rounded-lg px-2 py-1 hover:border-primary/50 active:scale-95 transition-all"
+            title="Open character sheet"
+          >
+            <div className="text-right">
+              <div className="text-[11px] text-primary font-display leading-tight truncate max-w-[80px]">{activeCharacter?.name}</div>
+              <div className="text-[10px] text-muted-foreground leading-tight">Lv {displayLevel} · {displayHp}/{displayMaxHp} HP</div>
+            </div>
+            <div className="w-1.5 h-7 bg-black/60 rounded-full overflow-hidden flex flex-col-reverse">
+              <div
+                className="bg-gradient-to-t from-red-700 to-red-400 transition-all duration-500"
+                style={{ height: `${hpPct}%` }}
+              />
+            </div>
+          </button>
         </div>
 
         {/* Safe Haven Banner */}
