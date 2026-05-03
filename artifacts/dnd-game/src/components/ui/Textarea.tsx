@@ -17,6 +17,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           color: "var(--input-fg)",
           ...style,
         }}
+        spellCheck={false}
         ref={ref}
         {...props}
       />

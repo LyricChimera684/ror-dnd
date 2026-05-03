@@ -18,6 +18,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           color: "var(--input-fg)",
           ...style,
         }}
+        spellCheck={false}
         ref={ref}
         {...props}
       />
