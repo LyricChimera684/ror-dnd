@@ -46,6 +46,13 @@ and assets are an exact mirror of the source.
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 - `pnpm --filter @workspace/dnd-game run dev` — run the D&D frontend locally
 
+## Typography Conventions
+
+- The display face (`font-display`, Cinzel) renders poorly under ~12px. **Do not use `font-display` on text that is `text-xs` (12px) or smaller**, including `text-[10px]` and `text-[11px]`.
+- For small labels, chips, badges, and stat micro-headers, use `font-sans font-semibold` (typically with `uppercase tracking-wide` / `tracking-widest` for header-style chips).
+- Use `tabular-nums` on small numeric chips (HP/XP/Lv, ability scores, modifiers) so values stay aligned as they change.
+- `font-display` remains appropriate for headings and prominent values at `text-sm` and larger.
+
 ## Default Admin Credentials (after seeding)
 
 - username: `admin`

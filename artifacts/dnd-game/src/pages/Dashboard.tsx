@@ -113,14 +113,14 @@ export default function Dashboard() {
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="relative z-10">
                     {char.isDead && (
-                      <div className="absolute top-0 right-0 text-xs font-display text-red-300 bg-red-950/70 border-l border-b border-red-800/40 px-2 py-0.5 rounded-bl-md">
+                      <div className="absolute top-0 right-0 text-xs font-sans font-semibold uppercase tracking-wide text-red-300 bg-red-950/70 border-l border-b border-red-800/40 px-2 py-0.5 rounded-bl-md">
                         💀 Fallen
                       </div>
                     )}
                     <div className="flex justify-between items-start gap-3 mb-4">
                       <div className="min-w-0">
                         <h3 className="text-2xl text-primary truncate">{char.name}</h3>
-                        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground/80 font-display mt-1">
+                        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground/80 font-sans font-semibold mt-1">
                           {char.race} · {char.class}
                         </p>
                       </div>
@@ -133,7 +133,7 @@ export default function Dashboard() {
                       <div className="mt-3">
                         <button
                           onClick={() => setExpandedStatsId(expandedStatsId === char.id ? null : char.id)}
-                          className="w-full flex items-center justify-between text-xs font-display text-muted-foreground hover:text-primary transition-colors py-2 border-t border-border/30"
+                          className="w-full flex items-center justify-between text-xs font-sans font-semibold uppercase tracking-wide text-muted-foreground hover:text-primary transition-colors py-2 border-t border-border/30"
                         >
                           <span className="flex items-center gap-1.5"><Swords className="w-3 h-3" /> Ability Scores</span>
                           {expandedStatsId === char.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -150,8 +150,8 @@ export default function Dashboard() {
                               const mod = typeof score === "number" ? modifier(score) : null;
                               return (
                                 <div key={key} className="bg-foreground/[0.05] border border-border/20 rounded p-2 text-center">
-                                  <div className={`font-display text-xs ${color} mb-0.5`}>{short}</div>
-                                  <div className="font-display text-lg text-foreground leading-none">{score}</div>
+                                  <div className={`font-sans font-semibold uppercase tracking-wider text-xs ${color} mb-0.5`}>{short}</div>
+                                  <div className="font-display text-lg text-foreground leading-none tabular-nums">{score}</div>
                                   {mod && <div className={`font-sans text-xs mt-0.5 ${mod.startsWith("+") ? "text-green-400" : "text-red-400"}`}>{mod}</div>}
                                 </div>
                               );

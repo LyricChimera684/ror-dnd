@@ -123,7 +123,7 @@ export default function NoticeBoard() {
                     <div>
                       <span className="font-display text-primary">{notice.username}</span>
                       {notice.campaignTitle && (
-                        <span className="ml-2 text-xs font-display text-muted-foreground border border-border/40 px-1.5 py-0.5 rounded">
+                        <span className="ml-2 text-xs font-sans font-semibold uppercase tracking-wide text-muted-foreground border border-border/40 px-1.5 py-0.5 rounded">
                           {notice.campaignTitle}
                         </span>
                       )}

@@ -171,7 +171,7 @@ function CombatTracker({ sessionId, characterName, hp, maxHp }: { sessionId: num
       <div className="flex flex-wrap gap-2">
         {(combat.combatants as Array<{ name: string; hp: number; maxHp: number; initiative: number; isPlayer: boolean }>).map((c, i) => (
           <div key={i} className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs border ${c.isPlayer ? "border-blue-500/40 bg-blue-950/30 text-blue-300" : "border-red-500/40 bg-red-950/30 text-red-300"}`}>
-            <span className="font-display">{c.name}</span>
+            <span className="font-sans font-semibold">{c.name}</span>
             <span className="text-muted-foreground">❤ {c.hp}/{c.maxHp}</span>
           </div>
         ))}
@@ -196,8 +196,8 @@ function PartyTab({ campaignId, currentSessionId }: { campaignId: number; curren
         <div key={m.sessionId} className={`bg-card border rounded-lg p-3 ${m.sessionId === currentSessionId ? "border-primary/40" : "border-border/30"}`}>
           <div className="flex items-center justify-between mb-1">
             <span className="font-display text-foreground">{m.characterName}</span>
-            {m.isDead && <span className="text-xs text-red-400 font-display">💀 Fallen</span>}
-            {m.sessionId === currentSessionId && <span className="text-xs text-primary font-display">YOU</span>}
+            {m.isDead && <span className="text-xs text-red-400 font-sans font-semibold">💀 Fallen</span>}
+            {m.sessionId === currentSessionId && <span className="text-xs text-primary font-sans font-semibold tracking-wider">YOU</span>}
           </div>
           <div className="text-xs text-muted-foreground font-sans">
             {m.username} · Lvl {m.level} {m.race} {m.class}
@@ -262,7 +262,7 @@ function MapTab({ sessionId }: { sessionId: number }) {
       <div className="space-y-2">
         {locations.map((loc, i) => (
           <div key={i} className={`flex items-center gap-2 p-2 rounded border text-sm font-sans ${loc === mapData?.currentLocation ? "border-primary/40 bg-primary/10 text-primary" : "border-border/30 bg-card/50 text-muted-foreground"}`}>
-            <span className="w-5 h-5 flex items-center justify-center text-xs font-display opacity-60">{i + 1}</span>
+            <span className="w-5 h-5 flex items-center justify-center text-xs font-sans font-semibold opacity-60 tabular-nums">{i + 1}</span>
             <MapPin className="w-3 h-3 shrink-0" />
             <span>{loc}</span>
           </div>
@@ -295,7 +295,7 @@ function NpcsTab({ sessionId }: { sessionId: number }) {
         <div key={npc.id} className="bg-card border border-border/30 rounded-lg p-3">
           <div className="flex items-center justify-between mb-1">
             <span className="font-display text-foreground">{npc.name}</span>
-            <span className={`text-xs font-display px-1.5 py-0.5 border rounded ${dispositionColor[npc.disposition] ?? "text-muted-foreground border-border"}`}>
+            <span className={`text-xs font-sans font-semibold uppercase tracking-wide px-1.5 py-0.5 border rounded ${dispositionColor[npc.disposition] ?? "text-muted-foreground border-border"}`}>
               {npc.disposition}
             </span>
           </div>
@@ -332,7 +332,7 @@ function DiscussionTab({ campaignId }: { campaignId: number }) {
           return (
             <div key={msg.id} className={`flex gap-2 ${isMe ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[85%] rounded-lg px-3 py-2 ${isMe ? "bg-primary/20 border border-primary/30" : "bg-card border border-border"}`}>
-                <div className={`text-xs font-display tracking-wide mb-1 ${isMe ? "text-primary text-right" : "text-muted-foreground"}`}>{msg.username}</div>
+                <div className={`text-xs font-sans font-semibold tracking-wide mb-1 ${isMe ? "text-primary text-right" : "text-muted-foreground"}`}>{msg.username}</div>
                 <p className="font-sans text-sm leading-relaxed">{msg.message}</p>
               </div>
             </div>
@@ -473,10 +473,10 @@ function AttributesPanel({ character }: { character: { attributes?: unknown; spe
           return (
             <div key={key}>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-display text-muted-foreground w-8">{label}</span>
+                <span className="font-sans font-semibold uppercase tracking-wider text-muted-foreground w-8">{label}</span>
                 <span className="text-muted-foreground flex-1 pl-1 font-sans">{desc}</span>
-                <span className="font-display text-foreground">{score}</span>
-                <span className={`ml-2 w-8 text-right font-display text-xs ${modifier(score).startsWith("+") ? "text-green-400" : "text-red-400"}`}>{modifier(score)}</span>
+                <span className="font-sans font-semibold text-foreground tabular-nums">{score}</span>
+                <span className={`ml-2 w-8 text-right font-sans font-semibold text-xs tabular-nums ${modifier(score).startsWith("+") ? "text-green-400" : "text-red-400"}`}>{modifier(score)}</span>
               </div>
               <div className="h-1.5 bg-black/60 border border-border/30 rounded-full overflow-hidden">
                 <div className={`h-full ${color} transition-all duration-700`} style={{ width: `${pct}%` }} />
@@ -488,10 +488,10 @@ function AttributesPanel({ character }: { character: { attributes?: unknown; spe
 
       {slots && (
         <div className="pt-3 border-t border-border/30">
-          <h4 className="font-display text-primary/70 text-xs tracking-widest uppercase mb-2">Spell Slots (Lvl {slots.spellLevel})</h4>
+          <h4 className="font-sans font-semibold text-primary/70 text-xs tracking-widest uppercase mb-2">Spell Slots (Lvl {slots.spellLevel})</h4>
           <div className="flex gap-1.5 flex-wrap">
             {Array.from({ length: slots.total }).map((_, i) => (
-              <div key={i} className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-display transition-colors ${i < (slots.total - slots.used) ? "border-blue-500 bg-blue-950/60 text-blue-300" : "border-border/30 bg-black/20 text-muted-foreground/30"}`}>
+              <div key={i} className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs transition-colors ${i < (slots.total - slots.used) ? "border-blue-500 bg-blue-950/60 text-blue-300" : "border-border/30 bg-black/20 text-muted-foreground/30"}`}>
                 {i < (slots.total - slots.used) ? "✦" : "○"}
               </div>
             ))}
@@ -502,10 +502,10 @@ function AttributesPanel({ character }: { character: { attributes?: unknown; spe
 
       {effects.length > 0 && (
         <div className="pt-3 border-t border-border/30">
-          <h4 className="font-display text-primary/70 text-xs tracking-widest uppercase mb-2">Status Effects</h4>
+          <h4 className="font-sans font-semibold text-primary/70 text-xs tracking-widest uppercase mb-2">Status Effects</h4>
           <div className="flex flex-wrap gap-1.5">
             {effects.map((e) => (
-              <span key={e} className="px-2 py-0.5 rounded-full text-xs font-display border border-yellow-700/50 bg-yellow-950/40 text-yellow-300">{e}</span>
+              <span key={e} className="px-2 py-0.5 rounded-full text-xs font-sans font-medium border border-yellow-700/50 bg-yellow-950/40 text-yellow-300">{e}</span>
             ))}
           </div>
         </div>
@@ -693,13 +693,13 @@ export default function GameSession() {
                 {displayIsDead ? <Skull className="w-8 h-8 text-red-800/60" /> : <Sword className="w-8 h-8 text-primary/50" />}
               </div>
               <h3 className="text-xl font-display text-foreground">{activeCharacter.name}</h3>
-              {displayIsDead && <div className="text-xs text-red-400 font-display mb-1">💀 Fallen</div>}
+              {displayIsDead && <div className="text-xs text-red-400 font-sans font-semibold mb-1">💀 Fallen</div>}
               <p className="text-primary italic text-sm">{activeCharacter.race} · {activeCharacter.class}</p>
-              <span className="mt-1 inline-flex px-2 py-0.5 bg-white/5 border border-white/10 rounded font-display tracking-widest text-xs">LEVEL {displayLevel}</span>
+              <span className="mt-1 inline-flex px-2 py-0.5 bg-white/5 border border-white/10 rounded font-sans font-semibold tracking-widest text-xs">LEVEL {displayLevel}</span>
               {(((activeCharacter as CharacterWithExtras).statusEffects) ?? []).length > 0 && (
                 <div className="flex flex-wrap justify-center gap-1 mt-2">
                   {(((activeCharacter as CharacterWithExtras).statusEffects) ?? []).map((e) => (
-                    <span key={e} className="px-1.5 py-0.5 rounded-full text-xs font-display border border-yellow-700/60 bg-yellow-950/50 text-yellow-300">{e}</span>
+                    <span key={e} className="px-1.5 py-0.5 rounded-full text-xs font-sans font-medium border border-yellow-700/60 bg-yellow-950/50 text-yellow-300">{e}</span>
                   ))}
                 </div>
               )}
@@ -795,8 +795,8 @@ export default function GameSession() {
               title="Open character sheet"
             >
               <div className="text-right">
-                <div className="text-[11px] text-primary font-sans font-semibold leading-tight truncate max-w-[60px] sm:max-w-[80px]">{activeCharacter?.name}</div>
-                <div className="text-[10px] text-muted-foreground font-sans leading-tight whitespace-nowrap">Lv {displayLevel} · {displayHp}/{displayMaxHp}</div>
+                <div className="text-xs text-primary font-sans font-semibold leading-tight truncate max-w-[60px] sm:max-w-[80px]">{activeCharacter?.name}</div>
+                <div className="text-[11px] text-muted-foreground font-sans font-medium leading-tight whitespace-nowrap tabular-nums">Lv {displayLevel} · {displayHp}/{displayMaxHp}</div>
               </div>
               <div className="w-1.5 h-7 bg-foreground/10 rounded-full overflow-hidden flex flex-col-reverse">
                 <div

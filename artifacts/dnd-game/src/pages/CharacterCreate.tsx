@@ -78,7 +78,7 @@ function StatReveal({ character, onContinue }: { character: CreatedCharacter; on
 
           {attrs ? (
             <div className="space-y-3 mb-6">
-              <h2 className="font-display text-xs tracking-widest uppercase text-primary/60 flex items-center gap-2">
+              <h2 className="font-sans font-semibold text-xs tracking-widest uppercase text-primary/60 flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5" /> Ability Scores
               </h2>
               {ATTR_META.map(({ key, label, full, color }, i) => {
@@ -93,10 +93,10 @@ function StatReveal({ character, onContinue }: { character: CreatedCharacter; on
                     transition={{ delay: 0.1 + i * 0.08 }}
                   >
                     <div className="flex items-center gap-3 mb-1">
-                      <span className="font-display text-xs text-muted-foreground w-8 shrink-0">{label}</span>
+                      <span className="font-sans font-semibold uppercase tracking-wider text-xs text-muted-foreground w-8 shrink-0">{label}</span>
                       <span className="font-sans text-xs text-muted-foreground/70 flex-1">{full}</span>
-                      <span className="font-display text-foreground text-sm w-6 text-right">{score}</span>
-                      <span className={`font-display text-xs w-8 text-right ${mod.startsWith("+") ? "text-green-400" : "text-red-400"}`}>{mod}</span>
+                      <span className="font-display text-foreground text-sm w-6 text-right tabular-nums">{score}</span>
+                      <span className={`font-sans font-semibold text-xs w-8 text-right tabular-nums ${mod.startsWith("+") ? "text-green-400" : "text-red-400"}`}>{mod}</span>
                     </div>
                     <div className="h-2 bg-foreground/10 border border-border/20 rounded-full overflow-hidden">
                       <motion.div
@@ -123,7 +123,7 @@ function StatReveal({ character, onContinue }: { character: CreatedCharacter; on
               transition={{ delay: 0.7 }}
               className="mb-6 p-4 bg-blue-950/30 border border-blue-800/40 rounded-lg"
             >
-              <h3 className="font-display text-xs tracking-widest uppercase text-blue-400/70 mb-3">
+              <h3 className="font-sans font-semibold text-xs tracking-widest uppercase text-blue-400/70 mb-3">
                 Spell Slots · Level {slots.spellLevel}
               </h3>
               <div className="flex gap-2 items-center">

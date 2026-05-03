@@ -78,7 +78,7 @@ function CharacterPicker({ characters, selected, onSelect, lockedChars = {} }: C
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="font-display text-foreground truncate">{c.name}</span>
-                {c.isDead && <span className="text-xs text-red-400 font-display shrink-0">Fallen</span>}
+                {c.isDead && <span className="text-xs text-red-400 font-sans font-semibold uppercase tracking-wide shrink-0">Fallen</span>}
               </div>
               <div className="text-xs text-muted-foreground font-sans">{c.race} {c.class}</div>
               <div className="mt-1.5 flex items-center gap-2">
@@ -90,7 +90,7 @@ function CharacterPicker({ characters, selected, onSelect, lockedChars = {} }: C
             </div>
 
             <div className="shrink-0 text-right">
-              <div className={`inline-flex px-1.5 py-0.5 border text-xs font-display tracking-widest ${isSelected ? "border-primary/50 text-primary bg-primary/10" : "border-border/30 text-muted-foreground"}`}>
+              <div className={`inline-flex px-1.5 py-0.5 border text-xs font-sans font-semibold tracking-widest uppercase ${isSelected ? "border-primary/50 text-primary bg-primary/10" : "border-border/30 text-muted-foreground"}`}>
                 LVL {c.level}
               </div>
               {isSelected && (
@@ -279,7 +279,7 @@ export default function Campaigns() {
                     <h3 className="text-2xl sm:text-3xl text-primary min-w-0 break-words">{camp.title}</h3>
                     <div className="flex items-center gap-1.5">
                       {lockInfo && (
-                        <div className="flex items-center gap-1 px-2 py-0.5 border border-primary/20 bg-primary/5 text-xs font-display text-primary/70 rounded-full">
+                        <div className="flex items-center gap-1 px-2 py-0.5 border border-primary/20 bg-primary/5 text-xs font-sans font-semibold uppercase tracking-wide text-primary/70 rounded-full">
                           {lockInfo.canSwap ? (
                             <><Shield className="w-3 h-3 text-green-400" /> <span className="text-green-400">Swap available</span></>
                           ) : (
