@@ -355,9 +355,49 @@ Set the opening scene in 1-2 sentences. Include a [LOCATION:Name] tag.`;
   res.json(session);
 });
 
+// Sanitize untrusted player free-text input. Removes attempts to fake dice
+// rolls, inject DM tags (items, status, NPCs, etc.), or impersonate the DM.
+function sanitizePlayerAction(raw: string): string {
+  let s = raw;
+  // Strip DM-only structured tags
+  s = s.replace(/\[(?:ROLL|NPC|ITEM|LOCATION|STATUS|SAFE_HAVEN)[^\]]*\]/gi, "");
+  // Strip fake dice-roll prefixes like "🎲 Rolled 1d20 → 20"
+  s = s.replace(/🎲/g, "");
+  s = s.replace(/\b[Rr]olled\s+\d+\s*[dD]\s*\d+\s*(?:→|->|=|:)\s*\*{0,2}\s*\d+\s*\*{0,2}/g, "");
+  // Strip embedded JSON stat updates like {"xp":25,"hp":-5}
+  s = s.replace(/\{\s*"xp"\s*:\s*-?\d+\s*,\s*"hp"\s*:\s*-?\d+\s*\}/g, "");
+  // Strip lines that try to impersonate the DM
+  s = s.replace(/^\s*(?:DM|Dungeon\s*Master|System|Assistant)\s*[:>-]\s*/gim, "");
+  return s.replace(/\s+/g, " ").trim();
+}
+
+function rollDiceServer(notation: string): { total: number; rolls: number[]; count: number; sides: number } | null {
+  const m = notation.trim().match(/^(\d{1,2})\s*[dD]\s*(\d{1,3})$/);
+  if (!m) return null;
+  const count = Math.min(Math.max(parseInt(m[1], 10), 1), 20);
+  const sides = Math.min(Math.max(parseInt(m[2], 10), 2), 100);
+  const rolls = Array.from({ length: count }, () => 1 + Math.floor(Math.random() * sides));
+  return { total: rolls.reduce((a, b) => a + b, 0), rolls, count, sides };
+}
+
 router.post("/sessions/:sessionId/action", async (req, res) => {
   const { sessionId } = PerformActionParams.parse({ sessionId: req.params.sessionId });
   const body = PerformActionBody.parse(req.body);
+
+  // If client sent a trusted dice-roll request, server rolls it and overwrites action text.
+  if (body.diceRoll?.notation) {
+    const result = rollDiceServer(body.diceRoll.notation);
+    if (!result) {
+      res.status(400).json({ error: "Invalid dice notation" });
+      return;
+    }
+    const detail = result.count > 1 ? ` (${result.rolls.join(" + ")})` : "";
+    body.action = `🎲 Rolled ${result.count}d${result.sides} → **${result.total}**${detail}`;
+  } else {
+    // Untrusted free-text action — strip cheats and tag injections.
+    const cleaned = sanitizePlayerAction(body.action);
+    body.action = cleaned.length > 0 ? cleaned : "(stays silent)";
+  }
 
   const [session] = await db.select().from(gameSessionsTable).where(eq(gameSessionsTable.id, sessionId)).limit(1);
   if (!session) {

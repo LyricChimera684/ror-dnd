@@ -887,6 +887,14 @@ components:
           type: string
         characterId:
           type: integer
+        diceRoll:
+          type: object
+          description: When present, the server performs a trusted dice roll using this notation and ignores the action text.
+          properties:
+            notation:
+              type: string
+              description: Dice notation like "1d20" or "2d6"
+          required: [notation]
       required: [action]
 
     GameActionResponse:

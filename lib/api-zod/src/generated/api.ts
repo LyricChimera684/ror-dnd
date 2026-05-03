@@ -319,6 +319,14 @@ export const PerformActionParams = zod.object({
 export const PerformActionBody = zod.object({
   action: zod.string(),
   characterId: zod.number().optional(),
+  diceRoll: zod
+    .object({
+      notation: zod.string().describe('Dice notation like \"1d20\" or \"2d6\"'),
+    })
+    .optional()
+    .describe(
+      "When present, the server performs a trusted dice roll using this notation and ignores the action text.",
+    ),
 });
 
 export const PerformActionResponse = zod.object({

@@ -18,6 +18,7 @@ export * from "./createPlayerRequest";
 export * from "./discussionMessage";
 export * from "./dmInjectRequest";
 export * from "./gameActionRequest";
+export * from "./gameActionRequestDiceRoll";
 export * from "./gameActionResponse";
 export * from "./gameMessage";
 export * from "./gameSession";

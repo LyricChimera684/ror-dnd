@@ -5,8 +5,11 @@
  * D&D Text Game API
  * OpenAPI spec version: 0.1.0
  */
+import type { GameActionRequestDiceRoll } from "./gameActionRequestDiceRoll";
 
 export interface GameActionRequest {
   action: string;
   characterId?: number;
+  /** When present, the server performs a trusted dice roll using this notation and ignores the action text. */
+  diceRoll?: GameActionRequestDiceRoll;
 }

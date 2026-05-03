@@ -155,9 +155,19 @@ export interface DmInjectRequest {
   event: string;
 }
 
+/**
+ * When present, the server performs a trusted dice roll using this notation and ignores the action text.
+ */
+export type GameActionRequestDiceRoll = {
+  /** Dice notation like "1d20" or "2d6" */
+  notation: string;
+};
+
 export interface GameActionRequest {
   action: string;
   characterId?: number;
+  /** When present, the server performs a trusted dice roll using this notation and ignores the action text. */
+  diceRoll?: GameActionRequestDiceRoll;
 }
 
 export interface GameActionResponse {

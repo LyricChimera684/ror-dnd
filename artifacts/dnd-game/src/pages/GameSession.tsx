@@ -44,43 +44,26 @@ import {
   Shield, Plus, Trash2, Swords, ScrollText, Skull
 } from "lucide-react";
 
-// ─── Dice Roller ─────────────────────────────────────────────────────────────
-function rollDice(notation: string) {
-  const match = notation.match(/^(\d+)d(\d+)$/i);
-  if (!match) return { total: 0, rolls: [], sides: 20, count: 1 };
-  const count = parseInt(match[1]);
-  const sides = parseInt(match[2]);
-  const rolls: number[] = Array.from({ length: count }, () => Math.floor(Math.random() * sides) + 1);
-  return { total: rolls.reduce((a, b) => a + b, 0), rolls, sides, count };
-}
-
-function DiceButton({ notation, onRoll }: { notation: string; onRoll: (r: string) => void }) {
-  const [rolled, setRolled] = useState<null | ReturnType<typeof rollDice>>(null);
+// ─── Dice Roller (server-authoritative) ──────────────────────────────────────
+function DiceButton({ notation, onRoll }: { notation: string; onRoll: (notation: string) => void }) {
   const [animating, setAnimating] = useState(false);
+  const [sent, setSent] = useState(false);
   const handle = () => {
+    if (animating || sent) return;
     setAnimating(true);
-    setTimeout(() => { setRolled(rollDice(notation)); setAnimating(false); }, 600);
-  };
-  const confirm = () => {
-    if (!rolled) return;
-    const detail = rolled.count > 1 ? ` (${rolled.rolls.join(" + ")})` : "";
-    onRoll(`🎲 Rolled ${notation} → **${rolled.total}**${detail}`);
+    setTimeout(() => {
+      setAnimating(false);
+      setSent(true);
+      onRoll(notation);
+    }, 700);
   };
   return (
     <div className="flex flex-col items-center gap-2 my-3">
       <div className="text-sm font-display text-primary/80 tracking-widest uppercase">The DM asks you to roll {notation}</div>
-      {!rolled ? (
-        <Button onClick={handle} className="gap-2 bg-primary/20 border border-primary hover:bg-primary/40 text-primary font-display text-lg px-6 py-3" disabled={animating}>
-          <Dices className={`w-6 h-6 ${animating ? "animate-spin" : ""}`} />
-          {animating ? "Rolling..." : `Roll ${notation}`}
-        </Button>
-      ) : (
-        <div className="flex flex-col items-center gap-2">
-          <div className="text-4xl font-display text-primary drop-shadow-[0_0_10px_rgba(212,175,55,0.6)]">{rolled.total}</div>
-          {rolled.count > 1 && <div className="text-xs text-muted-foreground">({rolled.rolls.join(" + ")})</div>}
-          <Button onClick={confirm} size="sm" className="gap-2"><Send className="w-4 h-4" /> Send to DM</Button>
-        </div>
-      )}
+      <Button onClick={handle} className="gap-2 bg-primary/20 border border-primary hover:bg-primary/40 text-primary font-display text-lg px-6 py-3" disabled={animating || sent}>
+        <Dices className={`w-6 h-6 ${animating ? "animate-spin" : ""}`} />
+        {sent ? "Rolling..." : animating ? "Rolling..." : `Roll ${notation}`}
+      </Button>
     </div>
   );
 }
@@ -634,10 +617,10 @@ export default function GameSession() {
     takeAction({ sessionId: Number(sessionId), data: { action: actionInput, characterId: myCharacterId } });
   };
 
-  const handleDiceRoll = useCallback((result: string) => {
+  const handleDiceRoll = useCallback((notation: string) => {
     setPendingDice(null);
     setWaitingForRoll(false);
-    takeAction({ sessionId: Number(sessionId), data: { action: result, characterId: myCharacterId } });
+    takeAction({ sessionId: Number(sessionId), data: { action: "", characterId: myCharacterId, diceRoll: { notation } } });
   }, [sessionId, takeAction, myCharacterId]);
 
   if (!user || !session) return null;
