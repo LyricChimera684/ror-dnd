@@ -380,6 +380,7 @@ router.get("/admin/characters", async (req, res) => {
       race: charactersTable.race,
       class: charactersTable.class,
       playerId: charactersTable.playerId,
+      playerUsername: playersTable.username,
       level: charactersTable.level,
       hp: charactersTable.hp,
       maxHp: charactersTable.maxHp,
@@ -387,7 +388,8 @@ router.get("/admin/characters", async (req, res) => {
       isDead: charactersTable.isDead,
       createdAt: charactersTable.createdAt,
     })
-    .from(charactersTable);
+    .from(charactersTable)
+    .leftJoin(playersTable, eq(charactersTable.playerId, playersTable.id));
 
   res.json(characters);
 });

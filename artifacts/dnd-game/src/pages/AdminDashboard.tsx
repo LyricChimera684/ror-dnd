@@ -29,6 +29,7 @@ interface Character {
   race: string;
   class: string;
   playerId: number;
+  playerUsername: string | null;
   level: number;
   isDead: boolean;
 }
@@ -285,8 +286,7 @@ export default function AdminDashboard() {
                     <th className="px-4 py-2 font-display text-primary">Name</th>
                     <th className="px-4 py-2 font-display text-primary">Race / Class</th>
                     <th className="px-4 py-2 font-display text-primary">Level</th>
-                    <th className="px-4 py-2 font-display text-primary">Status</th>
-                    <th className="px-4 py-2 font-display text-primary">Player ID</th>
+                    <th className="px-4 py-2 font-display text-primary">Player</th>
                     <th className="px-4 py-2 font-display text-primary">Action</th>
                   </tr>
                 </thead>
@@ -297,12 +297,7 @@ export default function AdminDashboard() {
                       <td className="px-4 py-2">{ch.name}</td>
                       <td className="px-4 py-2 text-muted-foreground text-xs">{ch.race} / {ch.class}</td>
                       <td className="px-4 py-2">{ch.level}</td>
-                      <td className="px-4 py-2">
-                        <span className={ch.isDead ? "text-red-500" : "text-green-500"}>
-                          {ch.isDead ? "Dead" : "Alive"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2 text-muted-foreground text-xs">{ch.playerId}</td>
+                      <td className="px-4 py-2">{ch.playerUsername ?? <span className="text-muted-foreground italic">unknown</span>}</td>
                       <td className="px-4 py-2">
                         <button onClick={() => deleteCharacter(ch.id)} className="text-red-500 hover:text-red-400 transition-colors">
                           <Trash2 className="w-4 h-4" />
