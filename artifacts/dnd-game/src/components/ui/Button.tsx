@@ -10,13 +10,13 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'md', silent = false, onClick, ...props }, ref) => {
+  ({ className, variant = 'default', size = 'md', silent = false, onClick, style, ...props }, ref) => {
     const baseStyles = "inline-flex items-center justify-center rounded-xl font-display font-bold tracking-widest transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed uppercase";
 
     const variants = {
-      default: "bg-gradient-to-b from-primary to-yellow-700 text-primary-foreground border border-yellow-300 shadow-[0_0_15px_rgba(212,175,55,0.2)] hover:shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:brightness-110",
+      default: "ror-btn-default text-primary-foreground hover:brightness-110",
       outline: "border-2 border-primary text-primary hover:bg-primary/10 shadow-[inset_0_0_10px_rgba(212,175,55,0)] hover:shadow-[inset_0_0_15px_rgba(212,175,55,0.2)]",
-      ghost: "text-foreground hover:text-primary hover:bg-white/5",
+      ghost: "text-foreground hover:text-primary hover:bg-foreground/5",
       danger: "bg-gradient-to-b from-secondary to-red-900 text-white border border-red-500 shadow-[0_0_15px_rgba(139,0,0,0.3)] hover:shadow-[0_0_25px_rgba(139,0,0,0.5)]"
     };
 
@@ -28,7 +28,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
       if (!silent && !e.currentTarget.disabled) {
-        // Variant-aware click tone for slight character.
         if (variant === "danger") {
           sound.toggleOff();
         } else if (variant === "default") {
@@ -40,11 +39,26 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       onClick?.(e);
     };
 
+    const isDefault = variant === "default";
+
     return (
       <button
         ref={ref}
         className={cn(baseStyles, variants[variant], sizes[size], className)}
         onClick={handleClick}
+        style={
+          isDefault
+            ? {
+                backgroundImage:
+                  "linear-gradient(to bottom, var(--btn-grad-from), var(--btn-grad-to))",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "var(--btn-grad-border)",
+                boxShadow: "0 0 15px rgba(var(--btn-glow), 0.20)",
+                ...style,
+              }
+            : style
+        }
         {...props}
       />
     )

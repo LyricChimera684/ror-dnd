@@ -78,8 +78,8 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center space-y-4"
         >
-          <h1 className="text-4xl md:text-5xl">Welcome, {user.username}</h1>
-          <p className="text-xl font-sans text-muted-foreground italic max-w-2xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl break-words">Welcome, {user.username}</h1>
+          <p className="text-base sm:text-xl font-sans text-muted-foreground italic max-w-2xl mx-auto">
             The tavern is warm, but the roads outside are dark and full of terrors. Gather your strength.
           </p>
           <div className="flex flex-wrap justify-center gap-3 pt-4">
@@ -100,9 +100,9 @@ export default function Dashboard() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <div className="flex items-center justify-between mb-8 border-b border-border/50 pb-4">
-            <h2 className="text-3xl flex items-center gap-3">
-              <Shield className="text-primary" /> Your Characters
+          <div className="flex items-center justify-between mb-6 sm:mb-8 border-b border-border/50 pb-3 sm:pb-4">
+            <h2 className="text-2xl sm:text-3xl flex items-center gap-2 sm:gap-3">
+              <Shield className="text-primary w-6 h-6 sm:w-7 sm:h-7 shrink-0" /> Your Characters
             </h2>
           </div>
 
@@ -168,7 +168,7 @@ export default function Dashboard() {
                               const score = (char as any).attributes?.[key] ?? "—";
                               const mod = typeof score === "number" ? modifier(score) : null;
                               return (
-                                <div key={key} className="bg-black/30 border border-border/20 rounded p-2 text-center">
+                                <div key={key} className="bg-foreground/[0.05] border border-border/20 rounded p-2 text-center">
                                   <div className={`font-display text-xs ${color} mb-0.5`}>{short}</div>
                                   <div className="font-display text-lg text-foreground leading-none">{score}</div>
                                   {mod && <div className={`font-sans text-xs mt-0.5 ${mod.startsWith("+") ? "text-green-400" : "text-red-400"}`}>{mod}</div>}

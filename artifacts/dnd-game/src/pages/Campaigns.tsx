@@ -68,10 +68,10 @@ function CharacterPicker({ characters, selected, onSelect, lockedChars = {} }: C
             className={`w-full flex items-center gap-3 px-4 py-3 border text-left transition-all duration-200 ${
               isSelected
                 ? "border-primary bg-primary/10 shadow-[0_0_12px_rgba(212,175,55,0.15)]"
-                : "border-border/40 bg-black/20 hover:border-primary/40 hover:bg-black/30"
+                : "border-border/40 bg-foreground/[0.04] hover:border-primary/40 hover:bg-foreground/[0.07]"
             } ${c.isDead ? "opacity-50" : ""}`}
           >
-            <div className={`w-10 h-10 shrink-0 flex items-center justify-center text-xl border ${isSelected ? "border-primary/60 bg-primary/10" : "border-border/30 bg-black/30"}`}>
+            <div className={`w-10 h-10 shrink-0 flex items-center justify-center text-xl border ${isSelected ? "border-primary/60 bg-primary/10" : "border-border/30 bg-foreground/[0.06]"}`}>
               {c.isDead ? "💀" : classIcon(c.class)}
             </div>
 
@@ -82,7 +82,7 @@ function CharacterPicker({ characters, selected, onSelect, lockedChars = {} }: C
               </div>
               <div className="text-xs text-muted-foreground font-sans">{c.race} {c.class}</div>
               <div className="mt-1.5 flex items-center gap-2">
-                <div className="flex-1 h-1 bg-black/60 rounded-full overflow-hidden">
+                <div className="flex-1 h-1 bg-foreground/10 rounded-full overflow-hidden">
                   <div className={`h-full bg-gradient-to-r ${hpColor} transition-all`} style={{ width: `${hpPct}%` }} />
                 </div>
                 <span className="text-xs text-muted-foreground shrink-0">❤ {c.hp}/{c.maxHp}</span>
@@ -215,19 +215,19 @@ export default function Campaigns() {
   return (
     <AppLayout>
       <div className="space-y-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card/50 p-6 border border-border/50 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 bg-card/50 p-4 sm:p-6 border border-border/50 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
           <div>
-            <h1 className="text-4xl mb-2">Campaign Boards</h1>
-            <p className="font-sans text-muted-foreground italic">Find a party, or gather your own.</p>
+            <h1 className="text-3xl sm:text-4xl mb-2">Campaign Boards</h1>
+            <p className="font-sans text-muted-foreground italic text-sm sm:text-base">Find a party, or gather your own.</p>
           </div>
-          <Button size="lg" onClick={() => { sound.click(); setLocation("/campaign/new"); }}>
+          <Button size="lg" className="w-full md:w-auto" onClick={() => { sound.click(); setLocation("/campaign/new"); }}>
             <Map className="mr-2" /> Start a Campaign
           </Button>
         </div>
 
         {/* Character Selection Panel */}
         <div className="max-w-2xl mx-auto">
-          <div className="bg-black/30 border border-primary/20 rounded-2xl p-5 shadow-[0_8px_24px_rgba(0,0,0,0.18)]">
+          <div className="bg-foreground/[0.05] border border-primary/20 rounded-2xl p-5 shadow-[0_8px_24px_rgba(0,0,0,0.18)]">
             <div className="flex items-center gap-2 mb-4">
               <Sword className="w-4 h-4 text-primary" />
               <h3 className="font-display text-lg text-primary tracking-wide">Choose Your Adventurer</h3>
@@ -273,10 +273,10 @@ export default function Campaigns() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-card border border-border/50 rounded-2xl p-6 flex flex-col hover:border-primary/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.1)] transition-all duration-500"
+                  className="bg-card border border-border/50 rounded-2xl p-4 sm:p-6 flex flex-col hover:border-primary/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.1)] transition-all duration-500"
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-3xl text-primary">{camp.title}</h3>
+                  <div className="flex justify-between items-start gap-2 mb-2">
+                    <h3 className="text-2xl sm:text-3xl text-primary min-w-0 break-words">{camp.title}</h3>
                     <div className="flex items-center gap-1.5">
                       {lockInfo && (
                         <div className="flex items-center gap-1 px-2 py-0.5 border border-primary/20 bg-primary/5 text-xs font-display text-primary/70 rounded-full">
@@ -322,13 +322,14 @@ export default function Campaigns() {
 
                   <div className="mt-auto space-y-2">
                     {!camp.isPublic && camp.creatorId !== user?.id ? (
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 min-w-0">
                         <Input
                           placeholder="Invite Code"
                           id={`code-${camp.id}`}
-                          className="h-12 rounded-full"
+                          className="h-12 rounded-full flex-1 min-w-0"
                         />
                         <Button
+                          className="shrink-0"
                           onClick={() => {
                             const code = (document.getElementById(`code-${camp.id}`) as HTMLInputElement)?.value;
                             handleJoin(camp.id, code);
@@ -369,7 +370,7 @@ export default function Campaigns() {
             })}
 
             {campaigns?.length === 0 && (
-              <div className="col-span-full text-center py-20 bg-black/20 border border-border/50">
+              <div className="col-span-full text-center py-20 bg-foreground/[0.04] border border-border/50">
                 <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-2xl mb-2">No Campaigns Found</h3>
                 <p className="font-sans text-muted-foreground">The realms are quiet. Perhaps too quiet.</p>

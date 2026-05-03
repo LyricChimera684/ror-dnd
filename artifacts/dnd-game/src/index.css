@@ -27,31 +27,51 @@
   /* Dark Fantasy Theme (default) */
   --background: 30 15% 8%; /* Very dark warm gray/brown */
   --foreground: 45 40% 85%; /* Aged parchment text */
-  
+
   --primary: 43 74% 49%; /* Antiqued Gold */
   --primary-foreground: 30 15% 8%;
-  
+
   --secondary: 0 100% 25%; /* Deep Blood Red */
   --secondary-foreground: 45 40% 90%;
-  
+
   --muted: 30 10% 15%;
   --muted-foreground: 45 20% 60%;
-  
+
   --accent: 25 30% 20%; /* Dark wood/leather */
   --accent-foreground: 43 74% 49%;
-  
+
   --destructive: 0 80% 40%;
   --destructive-foreground: 0 0% 100%;
-  
+
   --border: 30 20% 20%;
   --ring: 43 74% 49%;
-  
+
   --card: 30 15% 10%;
   --card-foreground: 45 40% 85%;
 
   --bg-image: url('/images/bg-stone.png');
   --bg-radial: hsl(var(--accent) / 0.5);
   --bg-blend: overlay;
+
+  /* Theme-aware tokens for parchment-style surfaces (DM bubbles, journal, notices) */
+  --surface-parchment-bg: 30 12% 9%;
+  --surface-parchment-border: 38 30% 18%;
+  --surface-parchment-text: 45 40% 80%;
+
+  /* Theme-aware heading text shadow (was hardcoded for dark) */
+  --heading-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+
+  /* Input surface — theme-aware so themes don't need !important overrides */
+  --input-bg: hsl(0 0% 0% / 0.4);
+  --input-border: hsl(var(--border));
+  --input-fg: hsl(var(--foreground));
+  --input-placeholder: hsl(var(--muted-foreground));
+
+  /* Default button gradient stops (theme-aware) */
+  --btn-grad-from: hsl(var(--primary));
+  --btn-grad-to: hsl(var(--primary) / 0.62);
+  --btn-grad-border: hsl(var(--primary) / 0.55);
+  --btn-glow: 212, 175, 55;
 }
 
 [data-theme="glass"] {
@@ -83,6 +103,22 @@
   --bg-image: none;
   --bg-radial: hsl(211 100% 75% / 0.25);
   --bg-blend: normal;
+
+  --surface-parchment-bg: 220 30% 98%;
+  --surface-parchment-border: 220 14% 88%;
+  --surface-parchment-text: 220 15% 18%;
+
+  --heading-shadow: none;
+
+  --input-bg: hsl(0 0% 100% / 0.85);
+  --input-border: hsl(220 13% 80%);
+  --input-fg: hsl(220 15% 12%);
+  --input-placeholder: hsl(220 9% 58%);
+
+  --btn-grad-from: hsl(211 100% 55%);
+  --btn-grad-to: hsl(211 100% 36%);
+  --btn-grad-border: hsl(211 100% 70%);
+  --btn-glow: 0, 122, 255;
 }
 
 /* Glass: clean gradient fade — light Apple-blue at top → white at bottom, no photo */
@@ -105,57 +141,10 @@
   -webkit-backdrop-filter: blur(24px) saturate(180%);
 }
 
-/* Headings: remove the dark text-shadow designed for dark backgrounds */
-[data-theme="glass"] h1,
-[data-theme="glass"] h2,
-[data-theme="glass"] h3,
-[data-theme="glass"] h4,
-[data-theme="glass"] h5,
-[data-theme="glass"] h6 {
-  text-shadow: none;
-}
-
-/* Default button gradient: swap hardcoded yellow-700 end for deep Apple blue */
-[data-theme="glass"] .to-yellow-700 {
-  --tw-gradient-to: hsl(211 100% 36%);
-}
-
-/* Inputs & textareas: override hardcoded bg-black classes, ensure readability */
-[data-theme="glass"] input,
-[data-theme="glass"] textarea,
-[data-theme="glass"] select {
-  background-color: rgba(255, 255, 255, 0.82) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color: hsl(220 15% 12%) !important;
-  border-color: hsl(220 13% 80%) !important;
-}
-[data-theme="glass"] input::placeholder,
-[data-theme="glass"] textarea::placeholder {
-  color: hsl(220 9% 58%) !important;
-  opacity: 1;
-}
-[data-theme="glass"] input:focus,
-[data-theme="glass"] textarea:focus {
-  border-color: hsl(211 100% 50%) !important;
-  box-shadow: 0 0 0 2px hsl(211 100% 50% / 0.2) !important;
-}
-
 /* Labels: ensure they're dark on white */
 [data-theme="glass"] label,
 [data-theme="glass"] .text-muted-foreground {
   color: hsl(220 9% 38%) !important;
-}
-
-/* Border-glow override to Apple blue */
-[data-theme="glass"] .border-yellow-300 {
-  border-color: hsl(211 100% 70%) !important;
-}
-[data-theme="glass"] .shadow-\[0_0_15px_rgba\(212\,175\,55\,0\.2\)\] {
-  box-shadow: 0 0 15px rgba(0, 122, 255, 0.18) !important;
-}
-[data-theme="glass"] .hover\:shadow-\[0_0_25px_rgba\(212\,175\,55\,0\.4\)\]:hover {
-  box-shadow: 0 0 25px rgba(0, 122, 255, 0.38) !important;
 }
 
 [data-theme="crimson"] {
@@ -187,6 +176,22 @@
   --bg-image: none;
   --bg-radial: hsl(0 100% 25% / 0.35);
   --bg-blend: normal;
+
+  --surface-parchment-bg: 0 0% 8%;
+  --surface-parchment-border: 0 30% 16%;
+  --surface-parchment-text: 0 0% 82%;
+
+  --heading-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9);
+
+  --input-bg: hsl(0 0% 0% / 0.55);
+  --input-border: hsl(0 0% 18%);
+  --input-fg: hsl(0 0% 88%);
+  --input-placeholder: hsl(0 0% 50%);
+
+  --btn-grad-from: hsl(0 100% 45%);
+  --btn-grad-to: hsl(0 100% 28%);
+  --btn-grad-border: hsl(0 100% 60%);
+  --btn-glow: 204, 0, 0;
 }
 
 /* Iron & Crimson: forge photo, fade from blood-red at top → near-black at bottom */
@@ -233,6 +238,22 @@
   --bg-image: none;
   --bg-radial: hsl(140 60% 25% / 0.3);
   --bg-blend: normal;
+
+  --surface-parchment-bg: 150 50% 6%;
+  --surface-parchment-border: 145 35% 15%;
+  --surface-parchment-text: 130 30% 85%;
+
+  --heading-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+
+  --input-bg: hsl(150 40% 4% / 0.6);
+  --input-border: hsl(130 40% 18%);
+  --input-fg: hsl(130 30% 90%);
+  --input-placeholder: hsl(130 20% 55%);
+
+  --btn-grad-from: hsl(130 70% 55%);
+  --btn-grad-to: hsl(145 60% 28%);
+  --btn-grad-border: hsl(130 75% 75%);
+  --btn-glow: 110, 232, 138;
 }
 
 /* Moonlit Forest: forest photo, fade from silver-green at top → dark forest at bottom */
@@ -305,7 +326,7 @@ html:not([data-theme]) body {
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     @apply font-bold tracking-wider;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    text-shadow: var(--heading-shadow);
   }
 
   /* Custom Scrollbar for immersive feel */
@@ -403,7 +424,7 @@ header nav a:hover::after {
     background-blend-mode: multiply;
     color: #2A241C;
   }
-  
+
   .border-ornate {
     border: 2px solid hsl(var(--primary) / 0.35);
     border-radius: 1rem;
@@ -411,5 +432,15 @@ header nav a:hover::after {
 
   .text-glow {
     text-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+  }
+
+  /* Theme-aware parchment surface (DM message bubbles, journal, notices) */
+  .surface-parchment {
+    background-color: hsl(var(--surface-parchment-bg));
+    border-color: hsl(var(--surface-parchment-border));
+    color: hsl(var(--surface-parchment-text));
+  }
+  .text-parchment {
+    color: hsl(var(--surface-parchment-text));
   }
 }

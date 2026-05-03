@@ -6,6 +6,7 @@ import { sound } from "@/lib/sound";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import { ScrollText, Plus, Shield, Swords, Star } from "lucide-react";
 
 export default function NoticeBoard() {
@@ -46,8 +47,8 @@ export default function NoticeBoard() {
     <AppLayout>
       <div className="space-y-8 max-w-3xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-          <h1 className="text-4xl md:text-5xl mb-3">Tavern Notice Board</h1>
-          <p className="text-muted-foreground font-sans italic">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl mb-3">Tavern Notice Board</h1>
+          <p className="text-muted-foreground font-sans italic text-sm sm:text-base">
             Leave word for fellow adventurers. Boast of victories, warn of dangers, seek companions.
           </p>
         </motion.div>
@@ -62,11 +63,11 @@ export default function NoticeBoard() {
               <div className="bg-card border-ornate p-5 space-y-3">
                 <h3 className="font-display text-primary text-lg">Write Your Notice</h3>
                 <form onSubmit={handlePost} className="space-y-3">
-                  <textarea
+                  <Textarea
                     value={form.content}
                     onChange={(e) => setForm({ ...form, content: e.target.value })}
                     placeholder="What tale do you bring to the tavern? Share your triumph, your warning, or your quest..."
-                    className="w-full h-28 bg-background border border-border/50 rounded-lg px-3 py-2 text-sm font-sans text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="h-28 text-sm"
                     maxLength={500}
                     required
                   />
@@ -112,7 +113,7 @@ export default function NoticeBoard() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="bg-[#1c1a15] border border-[#3a3020] rounded-lg p-4 sm:p-5 relative overflow-hidden"
+                className="surface-parchment border rounded-lg p-4 sm:p-5 relative overflow-hidden"
               >
                 <div className="absolute top-3 right-4 opacity-10">
                   <Icon className="w-16 h-16 text-primary" />
@@ -131,7 +132,7 @@ export default function NoticeBoard() {
                       {new Date(notice.createdAt).toLocaleDateString([], { month: "short", day: "numeric" })}
                     </span>
                   </div>
-                  <p className="text-[#e8d5a3] font-sans text-sm leading-relaxed">{notice.content}</p>
+                  <p className="text-parchment font-sans text-sm leading-relaxed">{notice.content}</p>
                 </div>
               </motion.div>
             );

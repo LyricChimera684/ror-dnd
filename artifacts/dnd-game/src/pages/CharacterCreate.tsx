@@ -5,6 +5,7 @@ import { useCreateCharacter, useValidateCharacter } from "@workspace/api-client-
 import { auth } from "@/lib/auth";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { CheckCircle, XCircle, Loader2, Wand2, Shield, Sparkles, Trash2 } from "lucide-react";
 
@@ -97,7 +98,7 @@ function StatReveal({ character, onContinue }: { character: CreatedCharacter; on
                       <span className="font-display text-foreground text-sm w-6 text-right">{score}</span>
                       <span className={`font-display text-xs w-8 text-right ${mod.startsWith("+") ? "text-green-400" : "text-red-400"}`}>{mod}</span>
                     </div>
-                    <div className="h-2 bg-black/50 border border-border/20 rounded-full overflow-hidden">
+                    <div className="h-2 bg-foreground/10 border border-border/20 rounded-full overflow-hidden">
                       <motion.div
                         className={`h-full bg-gradient-to-r ${color}`}
                         initial={{ width: 0 }}
@@ -300,16 +301,15 @@ export default function CharacterCreate() {
 
             <div>
               <label className="block font-display text-base sm:text-lg mb-1.5">Tale of Origins (Optional)</label>
-              <textarea
+              <Textarea
                 value={backstory}
                 onChange={handleFieldChange(setBackstory)}
                 rows={3}
                 placeholder="Where did you come from? What drives you?"
-                className="w-full bg-black/40 border border-border px-4 py-3 text-base font-sans text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none rounded"
               />
             </div>
 
-            <div className="text-sm text-muted-foreground/80 font-sans rounded border border-border/30 bg-black/20 px-4 py-3">
+            <div className="text-sm text-muted-foreground/80 font-sans rounded border border-border/30 bg-foreground/[0.04] px-4 py-3">
               Your character's ability scores will be chosen by the AI based on your concept, so you can focus on the story instead of min-maxing.
             </div>
 

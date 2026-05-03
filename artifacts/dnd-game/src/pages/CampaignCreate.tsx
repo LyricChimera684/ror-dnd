@@ -5,6 +5,7 @@ import { useCreateCampaign } from "@workspace/api-client-react";
 import { auth } from "@/lib/auth";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import {
   Wand2,
@@ -190,24 +191,24 @@ function ModePicker({ onSelect }: { onSelect: (mode: "preset" | "diy" | "synopsi
       exit={{ opacity: 0, y: -20 }}
       className="max-w-2xl mx-auto"
     >
-      <div className="bg-card/90 backdrop-blur-md border-ornate p-10 shadow-2xl text-center">
-        <h1 className="text-4xl text-primary mb-2">Weave a New World</h1>
-        <p className="font-sans text-muted-foreground italic mb-10">
+      <div className="bg-card/90 backdrop-blur-md border-ornate p-5 sm:p-8 md:p-10 shadow-2xl text-center">
+        <h1 className="text-3xl sm:text-4xl text-primary mb-2">Weave a New World</h1>
+        <p className="font-sans text-muted-foreground italic mb-6 sm:mb-10 text-sm sm:text-base">
           Take on the mantle of the Dungeon Master.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onSelect("preset")}
-            className="group flex flex-col items-center gap-4 p-8 bg-primary/10 border border-border hover:border-primary/60 hover:bg-primary/20 transition-all duration-300 cursor-pointer text-left"
+            className="group flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-8 bg-primary/10 border border-border hover:border-primary/60 hover:bg-primary/20 transition-all duration-300 cursor-pointer text-left"
           >
-            <div className="w-16 h-16 flex items-center justify-center border border-primary/40 bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
-              <Wand2 className="w-8 h-8" />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border border-primary/40 bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+              <Wand2 className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
             <div>
-              <div className="font-display text-xl text-primary mb-1">Use a Preset</div>
-              <div className="font-sans text-sm text-muted-foreground">
+              <div className="font-display text-lg sm:text-xl text-primary mb-1">Use a Preset</div>
+              <div className="font-sans text-xs sm:text-sm text-muted-foreground">
                 Choose from {PRESETS.length} legendary adventures and start playing in seconds.
               </div>
             </div>
@@ -217,14 +218,14 @@ function ModePicker({ onSelect }: { onSelect: (mode: "preset" | "diy" | "synopsi
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onSelect("diy")}
-            className="group flex flex-col items-center gap-4 p-8 bg-primary/10 border border-border hover:border-primary/60 hover:bg-primary/20 transition-all duration-300 cursor-pointer text-left"
+            className="group flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-8 bg-primary/10 border border-border hover:border-primary/60 hover:bg-primary/20 transition-all duration-300 cursor-pointer text-left"
           >
-            <div className="w-16 h-16 flex items-center justify-center border border-primary/40 bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
-              <Pencil className="w-8 h-8" />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border border-primary/40 bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+              <Pencil className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
             <div>
-              <div className="font-display text-xl text-primary mb-1">Build Your Own</div>
-              <div className="font-sans text-sm text-muted-foreground">
+              <div className="font-display text-lg sm:text-xl text-primary mb-1">Build Your Own</div>
+              <div className="font-sans text-xs sm:text-sm text-muted-foreground">
                 Craft your world from scratch — your story, your rules.
               </div>
             </div>
@@ -234,14 +235,14 @@ function ModePicker({ onSelect }: { onSelect: (mode: "preset" | "diy" | "synopsi
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onSelect("synopsis")}
-            className="group flex flex-col items-center gap-4 p-8 bg-primary/10 border border-border hover:border-primary/60 hover:bg-primary/20 transition-all duration-300 cursor-pointer text-left"
+            className="group flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-8 bg-primary/10 border border-border hover:border-primary/60 hover:bg-primary/20 transition-all duration-300 cursor-pointer text-left"
           >
-            <div className="w-16 h-16 flex items-center justify-center border border-primary/40 bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
-              <Wand2 className="w-8 h-8" />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border border-primary/40 bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+              <Wand2 className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
             <div>
-              <div className="font-display text-xl text-primary mb-1">Generate Synopsis</div>
-              <div className="font-sans text-sm text-muted-foreground">
+              <div className="font-display text-lg sm:text-xl text-primary mb-1">Generate Synopsis</div>
+              <div className="font-sans text-xs sm:text-sm text-muted-foreground">
                 Create a world concept and story hook with one quick prompt.
               </div>
             </div>
@@ -271,25 +272,25 @@ function PresetGallery({
       exit={{ opacity: 0, y: -20 }}
       className="max-w-5xl mx-auto"
     >
-      <div className="bg-card/90 backdrop-blur-md border-ornate p-8 shadow-2xl">
-        <div className="flex items-center gap-4 mb-8 pb-6 border-b border-border/50">
+      <div className="bg-card/90 backdrop-blur-md border-ornate p-4 sm:p-6 md:p-8 shadow-2xl">
+        <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-border/50">
           <button
             onClick={onBack}
-            className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 font-sans text-sm"
+            className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 font-sans text-sm shrink-0"
           >
             <ChevronLeft className="w-4 h-4" />
-            Back
+            <span className="hidden sm:inline">Back</span>
           </button>
-          <div className="flex-1 text-center">
-            <h1 className="text-3xl text-primary">Choose Your Legend</h1>
-            <p className="font-sans text-muted-foreground text-sm italic mt-1">
+          <div className="flex-1 text-center min-w-0">
+            <h1 className="text-2xl sm:text-3xl text-primary">Choose Your Legend</h1>
+            <p className="font-sans text-muted-foreground text-xs sm:text-sm italic mt-1 hidden sm:block">
               Select a preset — you can customise all fields before creating.
             </p>
           </div>
-          <div className="w-16" />
+          <div className="w-8 sm:w-16 shrink-0" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {PRESETS.map((preset) => (
             <motion.button
               key={preset.id}
@@ -420,52 +421,52 @@ function CampaignForm({
       exit={{ opacity: 0, y: -20 }}
       className="max-w-3xl mx-auto"
     >
-      <div className="bg-card/90 backdrop-blur-md border-ornate p-8 md:p-12 shadow-2xl">
-        <div className="flex items-center gap-4 mb-8 pb-6 border-b border-border/50">
+      <div className="bg-card/90 backdrop-blur-md border-ornate p-4 sm:p-8 md:p-12 shadow-2xl">
+        <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-border/50">
           <button
             onClick={onBack}
             className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 font-sans text-sm shrink-0"
           >
             <ChevronLeft className="w-4 h-4" />
-            Back
+            <span className="hidden sm:inline">Back</span>
           </button>
-          <div className="flex-1 text-center">
+          <div className="flex-1 text-center min-w-0">
             {preset ? (
               <>
-                <div className="flex items-center justify-center gap-2 text-primary/60 font-sans text-xs uppercase tracking-widest mb-1">
-                  <Check className="w-3 h-3" />
-                  Preset: {preset.name}
+                <div className="flex items-center justify-center gap-2 text-primary/60 font-sans text-[10px] sm:text-xs uppercase tracking-widest mb-1 truncate">
+                  <Check className="w-3 h-3 shrink-0" />
+                  <span className="truncate">Preset: {preset.name}</span>
                 </div>
-                <h1 className="text-3xl text-primary">Customise Your World</h1>
-                <p className="font-sans text-muted-foreground text-sm italic mt-1">
+                <h1 className="text-2xl sm:text-3xl text-primary">Customise Your World</h1>
+                <p className="font-sans text-muted-foreground text-xs sm:text-sm italic mt-1 hidden sm:block">
                   Fields are pre-filled — edit anything you like.
                 </p>
               </>
             ) : (
               <>
-                <h1 className="text-4xl text-primary mb-1">Weave a New World</h1>
-                <p className="font-sans text-muted-foreground italic">
+                <h1 className="text-3xl sm:text-4xl text-primary mb-1">Weave a New World</h1>
+                <p className="font-sans text-muted-foreground italic text-sm sm:text-base">
                   Take on the mantle of the Dungeon Master.
                 </p>
               </>
             )}
           </div>
-          <div className="w-16 shrink-0" />
+          <div className="w-8 sm:w-16 shrink-0" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-8">
           <div>
-            <label className="block font-display text-xl mb-2 text-primary/90">Campaign Title</label>
+            <label className="block font-display text-lg sm:text-xl mb-2 text-primary/90">Campaign Title</label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. The Curse of Strahd"
-              className="text-xl py-4"
+              className="text-base sm:text-xl py-3 sm:py-4"
             />
           </div>
 
           <div>
-            <label className="block font-display text-xl mb-2 text-primary/90">The Setting / Lore</label>
+            <label className="block font-display text-lg sm:text-xl mb-2 text-primary/90">The Setting / Lore</label>
             <Input
               value={setting}
               onChange={(e) => setSetting(e.target.value)}
@@ -474,8 +475,8 @@ function CampaignForm({
           </div>
 
           <div>
-            <div className="flex items-center justify-between gap-4 mb-2">
-              <label className="block font-display text-xl text-primary/90">Synopsis</label>
+            <div className="flex items-center justify-between gap-3 sm:gap-4 mb-2 flex-wrap">
+              <label className="block font-display text-lg sm:text-xl text-primary/90">Synopsis</label>
               <Button
                 type="button"
                 variant="ghost"
@@ -486,16 +487,16 @@ function CampaignForm({
                 {isGeneratingSynopsis ? "Generating..." : "Generate Synopsis"}
               </Button>
             </div>
-            <textarea
+            <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={5}
               placeholder="What adventure awaits the brave souls who join?"
-              className="w-full bg-black/40 border border-border rounded-xl px-4 py-3 text-lg font-sans text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+              className="text-base sm:text-lg"
             />
           </div>
 
-          <div className="bg-black/20 p-6 border border-border/50 rounded-xl flex flex-col gap-6">
+          <div className="bg-foreground/[0.04] p-4 sm:p-6 border border-border/50 rounded-xl flex flex-col gap-4 sm:gap-6">
             <label className="flex items-center gap-4 cursor-pointer">
               <div className="relative" onClick={() => setIsPublic((v) => !v)}>
                 <div
