@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { auth } from "@/lib/auth";
-import { LogOut, Scroll, Swords, Home, Menu, X, ScrollText } from "lucide-react";
+import { LogOut, Scroll, Swords, Home, Menu, X, ScrollText, Shield } from "lucide-react";
 import { useClerk } from "@clerk/react";
 import { ThemeMenu } from "./ThemeMenu";
 import { SoundToggle } from "./SoundToggle";
@@ -29,7 +29,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-4">
           {/* Logo */}
           <Link
-            href="/dashboard"
+            href={user.role === "admin" ? "/admin" : "/dashboard"}
             className="text-lg sm:text-2xl font-display font-bold text-primary text-glow flex items-center gap-1.5 sm:gap-2 hover:brightness-125 transition-all shrink-0 min-w-0"
           >
             <Swords className="w-5 h-5 sm:w-7 sm:h-7 shrink-0" />
@@ -39,24 +39,35 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex gap-5 flex-1 ml-6">
-            <Link
-              href="/dashboard"
-              className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
-            >
-              <Home className="w-4 h-4" /> Hub
-            </Link>
-            <Link
-              href="/campaigns"
-              className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
-            >
-              <Scroll className="w-4 h-4" /> Campaigns
-            </Link>
-            <Link
-              href="/notices"
-              className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
-            >
-              <ScrollText className="w-4 h-4" /> Notice Board
-            </Link>
+            {user.role === "admin" ? (
+              <Link
+                href="/admin"
+                className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+              >
+                <Shield className="w-4 h-4" /> Admin Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+                >
+                  <Home className="w-4 h-4" /> Hub
+                </Link>
+                <Link
+                  href="/campaigns"
+                  className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+                >
+                  <Scroll className="w-4 h-4" /> Campaigns
+                </Link>
+                <Link
+                  href="/notices"
+                  className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+                >
+                  <ScrollText className="w-4 h-4" /> Notice Board
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* Right side */}
@@ -90,27 +101,39 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-border/50 bg-black/90 backdrop-blur-md px-4 py-4 flex flex-col gap-1 shadow-xl">
-            <Link
-              href="/dashboard"
-              onClick={() => setMobileMenuOpen(false)}
-              className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-white/5 active:bg-white/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
-            >
-              <Home className="w-5 h-5" /> Hub
-            </Link>
-            <Link
-              href="/campaigns"
-              onClick={() => setMobileMenuOpen(false)}
-              className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-white/5 active:bg-white/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
-            >
-              <Scroll className="w-5 h-5" /> Campaigns
-            </Link>
-            <Link
-              href="/notices"
-              onClick={() => setMobileMenuOpen(false)}
-              className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-white/5 active:bg-white/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
-            >
-              <ScrollText className="w-5 h-5" /> Notice Board
-            </Link>
+            {user.role === "admin" ? (
+              <Link
+                href="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-white/5 active:bg-white/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
+              >
+                <Shield className="w-5 h-5" /> Admin Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-white/5 active:bg-white/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
+                >
+                  <Home className="w-5 h-5" /> Hub
+                </Link>
+                <Link
+                  href="/campaigns"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-white/5 active:bg-white/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
+                >
+                  <Scroll className="w-5 h-5" /> Campaigns
+                </Link>
+                <Link
+                  href="/notices"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-white/5 active:bg-white/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
+                >
+                  <ScrollText className="w-5 h-5" /> Notice Board
+                </Link>
+              </>
+            )}
             <div className="mt-2 pt-3 border-t border-border/30 flex items-center gap-2 sm:hidden">
               <SoundToggle />
               <ThemeMenu />
