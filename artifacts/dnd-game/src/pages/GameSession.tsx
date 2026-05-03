@@ -811,7 +811,7 @@ export default function GameSession() {
                       transition={{ duration: 0.12 }}
                       role="menu"
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute left-0 mt-1 z-40 min-w-[180px] bg-card border border-border rounded-md shadow-xl overflow-hidden"
+                      className="absolute left-0 mt-1 z-40 min-w-[200px] bg-background border border-border rounded-md shadow-2xl overflow-hidden"
                     >
                       {codexTabs.map((t) => (
                         <button
