@@ -5,7 +5,7 @@ import { useGetPlayerCharacters, getGetPlayerCharactersQueryKey } from "@workspa
 import { auth } from "@/lib/auth";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/Button";
-import { Plus, Shield, ScrollText, Sparkles, Scroll, Trash2, Loader2, ChevronDown, ChevronUp, Swords } from "lucide-react";
+import { Plus, Shield, ScrollText, Sparkles, Scroll, Trash2, Loader2, ChevronDown, ChevronUp, Swords, Heart, Star, BookOpen } from "lucide-react";
 
 const ATTR_LABELS: Record<string, { short: string; color: string }> = {
   str: { short: "STR", color: "text-red-400" },
@@ -128,38 +128,83 @@ export default function Dashboard() {
                         Lv {char.level}
                       </span>
                     </div>
-                    {/* Ability Scores toggle */}
-                    {(char as any).attributes && (
-                      <div className="mt-3">
-                        <button
-                          onClick={() => setExpandedStatsId(expandedStatsId === char.id ? null : char.id)}
-                          className="w-full flex items-center justify-between text-xs font-sans font-semibold uppercase tracking-wide text-muted-foreground hover:text-primary transition-colors py-2 border-t border-border/30"
+                    {/* Character Details toggle */}
+                    <div className="mt-3">
+                      <button
+                        onClick={() => setExpandedStatsId(expandedStatsId === char.id ? null : char.id)}
+                        className="w-full flex items-center justify-between text-xs font-sans font-semibold uppercase tracking-wide text-muted-foreground hover:text-primary transition-colors py-2 border-t border-border/30"
+                      >
+                        <span className="flex items-center gap-1.5"><Swords className="w-3 h-3" /> Show Character Details</span>
+                        {expandedStatsId === char.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                      </button>
+                      {expandedStatsId === char.id && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="mt-2 space-y-4 overflow-hidden"
                         >
-                          <span className="flex items-center gap-1.5"><Swords className="w-3 h-3" /> Ability Scores</span>
-                          {expandedStatsId === char.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                        </button>
-                        {expandedStatsId === char.id && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="grid grid-cols-3 gap-2 mt-2"
-                          >
-                            {Object.entries(ATTR_LABELS).map(([key, { short, color }]) => {
-                              const score = (char as any).attributes?.[key] ?? "—";
-                              const mod = typeof score === "number" ? modifier(score) : null;
-                              return (
-                                <div key={key} className="bg-foreground/[0.05] border border-border/20 rounded p-2 text-center">
-                                  <div className={`font-sans font-semibold uppercase tracking-wider text-xs ${color} mb-0.5`}>{short}</div>
-                                  <div className="font-display text-lg text-foreground leading-none tabular-nums">{score}</div>
-                                  {mod && <div className={`font-sans text-xs mt-0.5 ${mod.startsWith("+") ? "text-green-400" : "text-red-400"}`}>{mod}</div>}
-                                </div>
-                              );
-                            })}
-                          </motion.div>
-                        )}
-                      </div>
-                    )}
+                          {/* Stats row */}
+                          <div className="grid grid-cols-3 gap-2">
+                            {[
+                              { label: "Level", value: char.level, icon: <Star className="w-3 h-3" />, color: "text-primary" },
+                              { label: "HP", value: `${char.hp}/${char.maxHp}`, icon: <Heart className="w-3 h-3" />, color: "text-green-400" },
+                              { label: "XP", value: char.xp, icon: <Sparkles className="w-3 h-3" />, color: "text-blue-400" },
+                            ].map(({ label, value, icon, color }) => (
+                              <div key={label} className="bg-foreground/[0.05] border border-border/20 rounded p-2 text-center">
+                                <div className={`flex items-center justify-center gap-1 font-sans font-semibold uppercase tracking-wider text-xs ${color} mb-1`}>{icon}{label}</div>
+                                <div className="font-display text-base text-foreground leading-none tabular-nums">{value}</div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Ability scores */}
+                          {(char as any).attributes && (
+                            <div>
+                              <div className="text-xs font-sans font-semibold uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
+                                <Swords className="w-3 h-3" /> Ability Scores
+                              </div>
+                              <div className="grid grid-cols-3 gap-2">
+                                {Object.entries(ATTR_LABELS).map(([key, { short, color }]) => {
+                                  const score = (char as any).attributes?.[key] ?? "—";
+                                  const mod = typeof score === "number" ? modifier(score) : null;
+                                  return (
+                                    <div key={key} className="bg-foreground/[0.05] border border-border/20 rounded p-2 text-center">
+                                      <div className={`font-sans font-semibold uppercase tracking-wider text-xs ${color} mb-0.5`}>{short}</div>
+                                      <div className="font-display text-lg text-foreground leading-none tabular-nums">{score}</div>
+                                      {mod && <div className={`font-sans text-xs mt-0.5 ${mod.startsWith("+") ? "text-green-400" : "text-red-400"}`}>{mod}</div>}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Spell slots */}
+                          {(char as any).spellSlots && (
+                            <div className="bg-foreground/[0.04] border border-border/20 rounded p-3">
+                              <div className="text-xs font-sans font-semibold uppercase tracking-wide text-muted-foreground mb-2">Spell Slots</div>
+                              <div className="flex items-center gap-3 text-sm font-sans">
+                                <span className="text-muted-foreground">Level {(char as any).spellSlots.spellLevel}</span>
+                                <span className="text-foreground tabular-nums">{(char as any).spellSlots.total - (char as any).spellSlots.used} / {(char as any).spellSlots.total} remaining</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Backstory */}
+                          {(char as any).backstory && (
+                            <div>
+                              <div className="text-xs font-sans font-semibold uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
+                                <BookOpen className="w-3 h-3" /> Backstory
+                              </div>
+                              <p className="font-sans text-sm text-muted-foreground italic leading-relaxed border-l-2 border-primary/30 pl-3">
+                                {(char as any).backstory}
+                              </p>
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
+                    </div>
                     <div className="mt-4 pt-3 border-t border-border/20">
                       <Button
                         variant="ghost"
