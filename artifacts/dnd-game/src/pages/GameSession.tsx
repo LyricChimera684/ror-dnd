@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, useParams } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -650,12 +651,25 @@ export default function GameSession() {
   ];
   const codexActive = codexTabs.find((t) => t.id === tab);
   const [codexOpen, setCodexOpen] = useState(false);
+  const [codexPos, setCodexPos] = useState<{ top: number; left: number } | null>(null);
+  const codexBtnRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!codexOpen) return;
     const close = () => setCodexOpen(false);
     window.addEventListener("click", close);
     return () => window.removeEventListener("click", close);
   }, [codexOpen]);
+  const openCodex = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!codexOpen && codexBtnRef.current) {
+      const r = codexBtnRef.current.getBoundingClientRect();
+      setCodexPos({ top: r.bottom + 4, left: r.left });
+      sound.toggleOn();
+    } else {
+      sound.toggleOff();
+    }
+    setCodexOpen((o) => !o);
+  };
 
   return (
     <div className="h-screen w-full flex bg-background overflow-hidden">
@@ -789,10 +803,11 @@ export default function GameSession() {
 
               <div className="relative">
                 <button
+                  ref={codexBtnRef}
                   type="button"
                   aria-haspopup="menu"
                   aria-expanded={codexOpen}
-                  onClick={(e) => { e.stopPropagation(); setCodexOpen((o) => { const next = !o; if (next) sound.toggleOn(); else sound.toggleOff(); return next; }); }}
+                  onClick={openCodex}
                   onMouseEnter={() => sound.hover()}
                   title="Open codex"
                   className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-sm font-sans font-semibold uppercase tracking-wider transition-colors whitespace-nowrap ${
@@ -805,8 +820,8 @@ export default function GameSession() {
                   <span className="hidden sm:inline">{codexActive ? codexActive.label : "Codex"}</span>
                   <ChevronDown className={`w-3.5 h-3.5 transition-transform ${codexOpen ? "rotate-180" : ""}`} />
                 </button>
-                <AnimatePresence>
-                  {codexOpen && (
+                {codexOpen && codexPos && createPortal(
+                  <AnimatePresence>
                     <motion.div
                       initial={{ opacity: 0, y: -4, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -814,7 +829,8 @@ export default function GameSession() {
                       transition={{ duration: 0.12 }}
                       role="menu"
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute left-0 mt-1 z-[9999] min-w-[200px] bg-background border border-border rounded-xl shadow-2xl overflow-hidden"
+                      style={{ top: codexPos.top, left: codexPos.left }}
+                      className="fixed z-[9999] min-w-[200px] bg-background border border-border rounded-xl shadow-2xl overflow-hidden"
                     >
                       {codexTabs.map((t) => (
                         <button
@@ -833,8 +849,9 @@ export default function GameSession() {
                         </button>
                       ))}
                     </motion.div>
-                  )}
-                </AnimatePresence>
+                  </AnimatePresence>,
+                  document.body
+                )}
               </div>
             </div>
 
