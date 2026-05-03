@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import { auth } from "@/lib/auth";
 import { LogOut, Scroll, Swords, Home, Menu, X, ScrollText, Shield, Trophy } from "lucide-react";
 import { useClerk } from "@clerk/react";
 import { ThemeMenu } from "./ThemeMenu";
 import { SoundToggle } from "./SoundToggle";
+import { sound } from "@/lib/sound";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [, setLocation] = useLocation();
@@ -105,63 +107,65 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Mobile menu dropdown */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-border/50 bg-black/90 backdrop-blur-md px-4 py-4 flex flex-col gap-1 shadow-xl">
-            {user.role === "admin" ? (
-              <Link
-                href="/admin"
-                onClick={() => setMobileMenuOpen(false)}
-                className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-white/5 active:bg-white/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
-              >
-                <Shield className="w-5 h-5" /> Admin Dashboard
-              </Link>
-            ) : (
-              <>
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              key="mobile-menu"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-md px-4 py-4 flex flex-col gap-1 shadow-2xl"
+            >
+              {user.role === "admin" ? (
                 <Link
-                  href="/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-white/5 active:bg-white/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
+                  href="/admin"
+                  onClick={() => { sound.click(); setMobileMenuOpen(false); }}
+                  className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 active:bg-primary/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
                 >
-                  <Home className="w-5 h-5" /> Hub
+                  <Shield className="w-5 h-5" /> Admin Dashboard
                 </Link>
-                <Link
-                  href="/campaigns"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-white/5 active:bg-white/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
+              ) : (
+                <>
+                  {[
+                    { href: "/dashboard", icon: <Home className="w-5 h-5" />, label: "Hub" },
+                    { href: "/campaigns", icon: <Scroll className="w-5 h-5" />, label: "Campaigns" },
+                    { href: "/notices", icon: <ScrollText className="w-5 h-5" />, label: "Notice Board" },
+                    { href: "/achievements", icon: <Trophy className="w-5 h-5" />, label: "Achievements" },
+                  ].map(({ href, icon, label }, i) => (
+                    <motion.div
+                      key={href}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05, duration: 0.16 }}
+                    >
+                      <Link
+                        href={href}
+                        onClick={() => { sound.click(); setMobileMenuOpen(false); }}
+                        className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 active:bg-primary/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
+                      >
+                        {icon} {label}
+                      </Link>
+                    </motion.div>
+                  ))}
+                </>
+              )}
+              <div className="mt-2 pt-3 border-t border-border/30 flex items-center gap-2 sm:hidden">
+                <SoundToggle />
+                <ThemeMenu />
+                <button
+                  onClick={() => { sound.click(); handleLogout(); }}
+                  className="ml-auto flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-secondary text-sm font-display tracking-widest"
                 >
-                  <Scroll className="w-5 h-5" /> Campaigns
-                </Link>
-                <Link
-                  href="/notices"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-white/5 active:bg-white/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
-                >
-                  <ScrollText className="w-5 h-5" /> Notice Board
-                </Link>
-                <Link
-                  href="/achievements"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="font-display tracking-widest text-sm text-muted-foreground hover:text-primary hover:bg-white/5 active:bg-white/10 flex items-center gap-3 py-3 px-3 rounded-lg transition-colors"
-                >
-                  <Trophy className="w-5 h-5" /> Achievements
-                </Link>
-              </>
-            )}
-            <div className="mt-2 pt-3 border-t border-border/30 flex items-center gap-2 sm:hidden">
-              <SoundToggle />
-              <ThemeMenu />
-              <button
-                onClick={handleLogout}
-                className="ml-auto flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-secondary text-sm font-display tracking-widest"
-              >
-                <LogOut className="w-4 h-4" /> Logout
-              </button>
-            </div>
-            <div className="pt-2 text-xs text-muted-foreground font-sans italic px-3">
-              Playing as <span className="text-primary">{user.username}</span>
-            </div>
-          </div>
-        )}
+                  <LogOut className="w-4 h-4" /> Logout
+                </button>
+              </div>
+              <div className="pt-2 text-xs text-muted-foreground font-sans italic px-3">
+                Playing as <span className="text-primary">{user.username}</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-5 lg:px-8 pb-3 sm:pb-5 lg:pb-8 pt-20 sm:pt-24 relative">
