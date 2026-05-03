@@ -196,7 +196,7 @@ function ModePicker({ onSelect }: { onSelect: (mode: "preset" | "diy" | "synopsi
         <p className="font-sans text-muted-foreground italic mb-6 sm:mb-10 text-sm sm:text-base">
           Take on the mantle of the Dungeon Master.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
@@ -231,22 +231,6 @@ function ModePicker({ onSelect }: { onSelect: (mode: "preset" | "diy" | "synopsi
             </div>
           </motion.button>
 
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => onSelect("synopsis")}
-            className="group flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-8 bg-primary/10 border border-border hover:border-primary/60 hover:bg-primary/20 transition-all duration-300 cursor-pointer text-left"
-          >
-            <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border border-primary/40 bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
-              <Wand2 className="w-6 h-6 sm:w-8 sm:h-8" />
-            </div>
-            <div>
-              <div className="font-display text-lg sm:text-xl text-primary mb-1">Generate Synopsis</div>
-              <div className="font-sans text-xs sm:text-sm text-muted-foreground">
-                Create a world concept and story hook with one quick prompt.
-              </div>
-            </div>
-          </motion.button>
         </div>
       </div>
     </motion.div>
