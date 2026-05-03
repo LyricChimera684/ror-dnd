@@ -117,6 +117,7 @@ export default function Campaigns() {
   const [joiningId, setJoiningId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [lockedCampaigns, setLockedCampaigns] = useState<Record<number, { characterName: string; canSwap: boolean }>>({});
+  const [search, setSearch] = useState("");
 
   const { data: campaigns, isLoading, refetch } = useGetCampaigns({ playerId: user?.id }, {
     query: { queryKey: getGetCampaignsQueryKey({ playerId: user?.id }), enabled: !!user?.id }
@@ -257,128 +258,175 @@ export default function Campaigns() {
           </div>
         </div>
 
+        {/* Search bar */}
+        <div className="relative max-w-lg">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <Input
+            placeholder="Search campaigns by title, setting, or creator..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 h-11 rounded-full"
+          />
+        </div>
+
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[1, 2, 3, 4].map(i => <div key={i} className="h-48 bg-card animate-pulse border-ornate opacity-50" />)}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {campaigns?.map((camp, i) => {
-              const isOwner = camp.creatorId === user?.id;
-              const lockInfo = lockedCampaigns[camp.id];
+        ) : (() => {
+          const q = search.trim().toLowerCase();
+          const filtered = (campaigns ?? []).filter((c) =>
+            !q ||
+            c.title.toLowerCase().includes(q) ||
+            (c.setting ?? "").toLowerCase().includes(q) ||
+            ((c as any).creatorUsername ?? "").toLowerCase().includes(q)
+          );
+          const mine = filtered.filter((c) => c.creatorId === user?.id);
+          const others = filtered.filter((c) => c.creatorId !== user?.id);
 
-              return (
-                <motion.div
-                  key={camp.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="bg-card border border-border/50 rounded-2xl p-4 sm:p-6 flex flex-col hover:border-primary/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.1)] transition-all duration-500"
-                >
-                  <div className="flex justify-between items-start gap-2 mb-2">
-                    <h3 className="text-2xl sm:text-3xl text-primary min-w-0 break-words">{camp.title}</h3>
-                    <div className="flex items-center gap-1.5">
-                      {lockInfo && (
-                        <div className="flex items-center gap-1 px-2 py-0.5 border border-primary/20 bg-primary/5 text-xs font-sans font-semibold uppercase tracking-wide text-primary/70 rounded-full">
-                          {lockInfo.canSwap ? (
-                            <><Shield className="w-3 h-3 text-green-400" /> <span className="text-green-400">Swap available</span></>
-                          ) : (
-                            <><Lock className="w-3 h-3" /> {lockInfo.characterName}</>
-                          )}
-                        </div>
-                      )}
-                      {camp.isPublic ? (
-                        <span title="Public"><Globe className="text-muted-foreground w-5 h-5" /></span>
-                      ) : (
-                        <span title="Private"><Key className="text-secondary w-5 h-5" /></span>
-                      )}
-                    </div>
-                  </div>
-
-                  <p className="font-sans text-muted-foreground italic mb-4 flex-1">
-                    "{camp.description}"
-                  </p>
-
-                  <div className="space-y-2 mb-6 font-sans border-t border-border/30 pt-4">
-                    <div className="flex items-center gap-2">
-                      <Map className="w-4 h-4 text-muted-foreground" />
-                      <span>Setting: <span className="text-foreground">{camp.setting}</span></span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-muted-foreground" />
-                      <span>Creator: <span className="text-foreground">{(camp as any).creatorUsername || "Unknown"}</span></span>
-                    </div>
-                    {camp.createdAt && (
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-foreground">{getCampaignAge(camp.createdAt)}</span>
-                      </div>
-                    )}
-                    {!camp.isPublic && camp.inviteCode && isOwner && (
-                      <div className="text-sm text-primary/80 bg-primary/10 px-2 py-1 inline-block border border-primary/20 rounded-full">
-                        Code: {camp.inviteCode}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-auto space-y-2">
-                    {!camp.isPublic && camp.creatorId !== user?.id ? (
-                      <div className="flex gap-2 min-w-0">
-                        <Input
-                          placeholder="Invite Code"
-                          id={`code-${camp.id}`}
-                          className="h-12 rounded-full flex-1 min-w-0"
-                        />
-                        <Button
-                          className="shrink-0"
-                          onClick={() => {
-                            const code = (document.getElementById(`code-${camp.id}`) as HTMLInputElement)?.value;
-                            handleJoin(camp.id, code);
-                          }}
-                          disabled={joiningId === camp.id}
-                        >
-                          {joiningId === camp.id ? "..." : "Join"}
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        className="w-full rounded-full"
-                        onClick={() => handleJoin(camp.id)}
-                        disabled={joiningId === camp.id || !selectedCharId}
-                      >
-                        {joiningId === camp.id ? "Entering Realm..." : "Enter Campaign"}
-                      </Button>
-                    )}
-
-                    {isOwner && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full rounded-full text-red-400 hover:text-red-300 hover:bg-red-950/30 justify-center gap-2"
-                        onClick={() => handleDeleteCampaign(camp.id)}
-                        disabled={deletingId === camp.id}
-                      >
-                        {deletingId === camp.id ? (
-                          <><Loader2 className="w-3 h-3 animate-spin" /> Deleting...</>
+          const renderCard = (camp: typeof filtered[number], i: number) => {
+            const isOwner = camp.creatorId === user?.id;
+            const lockInfo = lockedCampaigns[camp.id];
+            return (
+              <motion.div
+                key={camp.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.07 }}
+                className="bg-card border border-border/50 rounded-2xl p-4 sm:p-6 flex flex-col hover:border-primary/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.1)] transition-all duration-500"
+              >
+                <div className="flex justify-between items-start gap-2 mb-2">
+                  <h3 className="text-2xl sm:text-3xl text-primary min-w-0 break-words">{camp.title}</h3>
+                  <div className="flex items-center gap-1.5">
+                    {lockInfo && (
+                      <div className="flex items-center gap-1 px-2 py-0.5 border border-primary/20 bg-primary/5 text-xs font-sans font-semibold uppercase tracking-wide text-primary/70 rounded-full">
+                        {lockInfo.canSwap ? (
+                          <><Shield className="w-3 h-3 text-green-400" /> <span className="text-green-400">Swap available</span></>
                         ) : (
-                          <><Trash2 className="w-3 h-3" /> Delete Campaign</>
+                          <><Lock className="w-3 h-3" /> {lockInfo.characterName}</>
                         )}
-                      </Button>
+                      </div>
+                    )}
+                    {camp.isPublic ? (
+                      <span title="Public"><Globe className="text-muted-foreground w-5 h-5" /></span>
+                    ) : (
+                      <span title="Private"><Key className="text-secondary w-5 h-5" /></span>
                     )}
                   </div>
-                </motion.div>
-              );
-            })}
+                </div>
 
-            {campaigns?.length === 0 && (
-              <div className="col-span-full text-center py-20 bg-foreground/[0.04] border border-border/50">
+                <p className="font-sans text-muted-foreground italic mb-4 flex-1">
+                  "{camp.description}"
+                </p>
+
+                <div className="space-y-2 mb-6 font-sans border-t border-border/30 pt-4">
+                  <div className="flex items-center gap-2">
+                    <Map className="w-4 h-4 text-muted-foreground" />
+                    <span>Setting: <span className="text-foreground">{camp.setting}</span></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-muted-foreground" />
+                    <span>Creator: <span className="text-foreground">{(camp as any).creatorUsername || "Unknown"}</span></span>
+                  </div>
+                  {camp.createdAt && (
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-foreground">{getCampaignAge(camp.createdAt)}</span>
+                    </div>
+                  )}
+                  {!camp.isPublic && camp.inviteCode && isOwner && (
+                    <div className="text-sm text-primary/80 bg-primary/10 px-2 py-1 inline-block border border-primary/20 rounded-full">
+                      Code: {camp.inviteCode}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-auto space-y-2">
+                  {!camp.isPublic && camp.creatorId !== user?.id ? (
+                    <div className="flex gap-2 min-w-0">
+                      <Input
+                        placeholder="Invite Code"
+                        id={`code-${camp.id}`}
+                        className="h-12 rounded-full flex-1 min-w-0"
+                      />
+                      <Button
+                        className="shrink-0"
+                        onClick={() => {
+                          const code = (document.getElementById(`code-${camp.id}`) as HTMLInputElement)?.value;
+                          handleJoin(camp.id, code);
+                        }}
+                        disabled={joiningId === camp.id}
+                      >
+                        {joiningId === camp.id ? "..." : "Join"}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      className="w-full rounded-full"
+                      onClick={() => handleJoin(camp.id)}
+                      disabled={joiningId === camp.id || !selectedCharId}
+                    >
+                      {joiningId === camp.id ? "Entering Realm..." : "Enter Campaign"}
+                    </Button>
+                  )}
+
+                  {isOwner && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full rounded-full text-red-400 hover:text-red-300 hover:bg-red-950/30 justify-center gap-2"
+                      onClick={() => handleDeleteCampaign(camp.id)}
+                      disabled={deletingId === camp.id}
+                    >
+                      {deletingId === camp.id ? (
+                        <><Loader2 className="w-3 h-3 animate-spin" /> Deleting...</>
+                      ) : (
+                        <><Trash2 className="w-3 h-3" /> Delete Campaign</>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </motion.div>
+            );
+          };
+
+          if (filtered.length === 0) {
+            return (
+              <div className="text-center py-20 bg-foreground/[0.04] border border-border/50 rounded-xl">
                 <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-2xl mb-2">No Campaigns Found</h3>
-                <p className="font-sans text-muted-foreground">The realms are quiet. Perhaps too quiet.</p>
+                <h3 className="text-2xl mb-2">{q ? "No Matches" : "No Campaigns Found"}</h3>
+                <p className="font-sans text-muted-foreground">{q ? `Nothing matched "${search}". Try a different search.` : "The realms are quiet. Perhaps too quiet."}</p>
               </div>
-            )}
-          </div>
-        )}
+            );
+          }
+
+          return (
+            <div className="space-y-10">
+              {mine.length > 0 && (
+                <section>
+                  <h2 className="text-xl sm:text-2xl flex items-center gap-2 mb-5 pb-3 border-b border-border/40">
+                    <Shield className="w-5 h-5 text-primary" /> My Campaigns
+                    <span className="text-sm font-sans font-medium text-muted-foreground ml-1">({mine.length})</span>
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {mine.map((c, i) => renderCard(c, i))}
+                  </div>
+                </section>
+              )}
+              {others.length > 0 && (
+                <section>
+                  <h2 className="text-xl sm:text-2xl flex items-center gap-2 mb-5 pb-3 border-b border-border/40">
+                    <Users className="w-5 h-5 text-primary" /> Others' Campaigns
+                    <span className="text-sm font-sans font-medium text-muted-foreground ml-1">({others.length})</span>
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {others.map((c, i) => renderCard(c, i))}
+                  </div>
+                </section>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </AppLayout>
   );
