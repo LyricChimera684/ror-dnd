@@ -845,7 +845,7 @@ export default function GameSession() {
               <DeathScreen characterName={activeCharacter?.name ?? "Your character"} onRestart={() => setLocation("/dashboard")} />
             ) : (
               <>
-                <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-7 space-y-8 min-h-0 bg-background/60">
+                <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-7 space-y-12 min-h-0 bg-background/60">
                   {historyLoading ? (
                     <div className="flex justify-center py-12"><Sword className="w-8 h-8 text-primary animate-spin" /></div>
                   ) : (
