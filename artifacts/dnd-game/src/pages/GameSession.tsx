@@ -36,6 +36,7 @@ type CharacterWithExtras = Character & {
   statusEffects?: string[];
 };
 import { auth } from "@/lib/auth";
+import { sound } from "@/lib/sound";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import {
@@ -771,7 +772,8 @@ export default function GameSession() {
                   key={t.id}
                   role="tab"
                   aria-selected={tab === t.id}
-                  onClick={() => setTab(t.id)}
+                  onClick={() => { sound.click(); setTab(t.id); }}
+                  onMouseEnter={() => sound.hover()}
                   title={t.label}
                   aria-label={t.label}
                   className={`flex items-center justify-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-sm font-sans font-semibold uppercase tracking-wider transition-colors whitespace-nowrap ${
@@ -790,7 +792,8 @@ export default function GameSession() {
                   type="button"
                   aria-haspopup="menu"
                   aria-expanded={codexOpen}
-                  onClick={(e) => { e.stopPropagation(); setCodexOpen((o) => !o); }}
+                  onClick={(e) => { e.stopPropagation(); setCodexOpen((o) => { const next = !o; if (next) sound.toggleOn(); else sound.toggleOff(); return next; }); }}
+                  onMouseEnter={() => sound.hover()}
                   title="Open codex"
                   className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-sm font-sans font-semibold uppercase tracking-wider transition-colors whitespace-nowrap ${
                     codexActive
@@ -817,7 +820,8 @@ export default function GameSession() {
                         <button
                           key={t.id}
                           role="menuitem"
-                          onClick={() => { setTab(t.id); setCodexOpen(false); }}
+                          onClick={() => { sound.click(); setTab(t.id); setCodexOpen(false); }}
+                          onMouseEnter={() => sound.hover()}
                           className={`w-full flex items-center gap-2 px-3 py-2 text-xs sm:text-sm font-sans font-medium tracking-wide text-left transition-colors ${
                             tab === t.id
                               ? "bg-primary/15 text-primary"
