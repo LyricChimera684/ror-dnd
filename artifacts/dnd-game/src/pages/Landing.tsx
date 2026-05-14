@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Swords, ChevronDown, Dices, Users, BookOpen, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { ThemeMenu } from "@/components/layout/ThemeMenu";
 import { sound } from "@/lib/sound";
 import { auth } from "@/lib/auth";
 
@@ -54,6 +55,11 @@ export default function Landing() {
 
   return (
     <div className="bg-background text-foreground overflow-x-hidden">
+      {/* ─── Floating top-right controls ───────────────────────────── */}
+      <div className="fixed top-3 right-3 z-50">
+        <ThemeMenu align="right" />
+      </div>
+
       {/* ─── Hero ──────────────────────────────────────────────────── */}
       <section className="relative h-screen min-h-[600px] flex flex-col items-center justify-center overflow-hidden">
         {/* Background */}
