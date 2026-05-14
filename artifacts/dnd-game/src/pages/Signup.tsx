@@ -157,7 +157,7 @@ export default function Signup() {
             Already have an account?{" "}
             <button
               type="button"
-              onClick={() => setLocation("/")}
+              onClick={() => setLocation("/login")}
               className="text-primary hover:underline font-display"
             >
               Sign In

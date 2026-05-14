@@ -7,6 +7,7 @@ import { ClerkProvider, SignIn, SignUp, useUser, useAuth, useClerk } from "@cler
 import { dark } from "@clerk/themes";
 
 import NotFound from "@/pages/not-found";
+import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Dashboard from "@/pages/Dashboard";
@@ -179,7 +180,8 @@ function ClerkProviderWithRoutes() {
         <TooltipProvider>
           <ClerkSyncGate>
             <Switch>
-              <Route path="/" component={Login} />
+              <Route path="/" component={Landing} />
+              <Route path="/login" component={Login} />
               <Route path="/signup" component={Signup} />
               <Route path="/sign-in/*?" component={SignInPage} />
               <Route path="/sign-up/*?" component={SignUpPage} />
