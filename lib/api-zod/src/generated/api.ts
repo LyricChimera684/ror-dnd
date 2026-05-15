@@ -183,6 +183,8 @@ export const GetCampaignsResponseItem = zod.object({
   isPublic: zod.boolean(),
   creatorId: zod.number(),
   inviteCode: zod.string().optional(),
+  dmType: zod.enum(["ai", "player"]),
+  humanDmId: zod.number().optional(),
   createdAt: zod.date(),
 });
 export const GetCampaignsResponse = zod.array(GetCampaignsResponseItem);
@@ -197,6 +199,8 @@ export const CreateCampaignBody = zod.object({
   isPublic: zod.boolean(),
   creatorId: zod.number(),
   inviteCode: zod.string().optional(),
+  dmType: zod.enum(["ai", "player"]).optional(),
+  humanDmId: zod.number().optional(),
 });
 
 /**
@@ -214,6 +218,8 @@ export const GetCampaignResponse = zod.object({
   isPublic: zod.boolean(),
   creatorId: zod.number(),
   inviteCode: zod.string().optional(),
+  dmType: zod.enum(["ai", "player"]),
+  humanDmId: zod.number().optional(),
   createdAt: zod.date(),
 });
 
@@ -319,6 +325,13 @@ export const PerformActionParams = zod.object({
 export const PerformActionBody = zod.object({
   action: zod.string(),
   characterId: zod.number().optional(),
+  playerId: zod.number().optional(),
+  isDmNarration: zod
+    .boolean()
+    .optional()
+    .describe(
+      "When true, the message is human-DM narration and is stored directly without AI.",
+    ),
   diceRoll: zod
     .object({
       notation: zod.string().describe('Dice notation like \"1d20\" or \"2d6\"'),
@@ -336,6 +349,12 @@ export const PerformActionResponse = zod.object({
   hpChange: zod.number().optional(),
   diceRequest: zod.string().optional(),
   isDead: zod.boolean().optional(),
+  awaitingDm: zod
+    .boolean()
+    .optional()
+    .describe(
+      "True when the campaign uses a human DM and the DM has not yet responded.",
+    ),
   newAchievements: zod
     .array(
       zod.object({

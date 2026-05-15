@@ -495,6 +495,7 @@ export default function GameSession() {
   const [characterDead, setCharacterDead] = useState(false);
   const [campaignStats, setCampaignStats] = useState<CampaignStats | null>(null);
   const [canSwap, setCanSwap] = useState(false);
+  const [awaitingDm, setAwaitingDm] = useState(false);
 
   useEffect(() => {
     if (!user || !session || session.sessionId !== Number(sessionId)) setLocation("/dashboard");
@@ -536,6 +537,8 @@ export default function GameSession() {
         setWaitingForRoll(false);
         refetchHistory();
         refetchCharacters();
+        if (data.awaitingDm) { setAwaitingDm(true); return; }
+        setAwaitingDm(false);
         if (data.diceRequest) { setPendingDice(data.diceRequest); setWaitingForRoll(true); }
         else { setPendingDice(null); }
         if (data.isDead) setCharacterDead(true);
@@ -554,10 +557,17 @@ export default function GameSession() {
 
   const myCharacterId = session?.characterId;
 
+  const isHumanDmCampaign = campaign?.dmType === "player";
+  const isHumanDm = isHumanDmCampaign && campaign?.humanDmId != null && campaign.humanDmId === user?.id;
+
   const handleAction = (e: React.FormEvent) => {
     e.preventDefault();
     if (!actionInput.trim() || actionPending || waitingForRoll) return;
-    takeAction({ sessionId: Number(sessionId), data: { action: actionInput, characterId: myCharacterId } });
+    if (isHumanDm) {
+      takeAction({ sessionId: Number(sessionId), data: { action: actionInput, playerId: user?.id, isDmNarration: true } });
+    } else {
+      takeAction({ sessionId: Number(sessionId), data: { action: actionInput, characterId: myCharacterId } });
+    }
   };
 
   const handleDiceRoll = useCallback((notation: string) => {
@@ -905,21 +915,54 @@ export default function GameSession() {
                 </div>
 
                 <div className="shrink-0 p-3 sm:p-4 bg-card border-t border-border shadow-[0_-5px_15px_rgba(0,0,0,0.4)] z-10">
-                  <form onSubmit={handleAction} className="max-w-3xl mx-auto flex gap-2 items-center">
-                    <Input
-                      value={actionInput}
-                      onChange={(e) => setActionInput(e.target.value)}
-                      placeholder={waitingForRoll ? "Roll the dice above first..." : "What do you do?"}
-                      className="flex-1 py-2.5 sm:py-3 text-base border-primary/40 focus-visible:ring-primary"
-                      disabled={actionPending || waitingForRoll}
-                    />
-                    <Button type="submit" size="sm" disabled={actionPending || !actionInput.trim() || waitingForRoll} className="shrink-0 h-10 w-10 p-0 bg-primary hover:bg-primary/80">
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </form>
-                  <p className="text-center mt-1.5 text-xs font-sans italic text-muted-foreground/60">
-                    {waitingForRoll ? "The DM awaits your dice roll above." : "Describe your actions. The Dungeon Master determines fate."}
-                  </p>
+                  {isHumanDm ? (
+                    <form onSubmit={handleAction} className="max-w-3xl mx-auto flex flex-col gap-2">
+                      <div className="flex items-center gap-2 text-xs font-sans font-semibold uppercase tracking-widest text-primary/80">
+                        <ScrollText className="w-3.5 h-3.5" />
+                        DM Narration
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          value={actionInput}
+                          onChange={(e) => setActionInput(e.target.value)}
+                          placeholder="Narrate the scene for your players..."
+                          className="flex-1 py-2.5 sm:py-3 text-base border-primary/40 focus-visible:ring-primary"
+                          disabled={actionPending}
+                        />
+                        <Button type="submit" size="sm" disabled={actionPending || !actionInput.trim()} className="shrink-0 h-10 w-10 p-0 bg-primary hover:bg-primary/80">
+                          <Send className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <p className="text-center text-xs font-sans italic text-muted-foreground/60">
+                        You are the Dungeon Master. Shape the world.
+                      </p>
+                    </form>
+                  ) : awaitingDm ? (
+                    <div className="max-w-3xl mx-auto text-center py-3">
+                      <div className="flex items-center justify-center gap-2 text-sm font-sans text-muted-foreground">
+                        <ScrollText className="w-4 h-4 text-primary animate-pulse" />
+                        <span className="italic">Awaiting the Dungeon Master's response…</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleAction} className="max-w-3xl mx-auto flex gap-2 items-center">
+                      <Input
+                        value={actionInput}
+                        onChange={(e) => setActionInput(e.target.value)}
+                        placeholder={waitingForRoll ? "Roll the dice above first..." : "What do you do?"}
+                        className="flex-1 py-2.5 sm:py-3 text-base border-primary/40 focus-visible:ring-primary"
+                        disabled={actionPending || waitingForRoll}
+                      />
+                      <Button type="submit" size="sm" disabled={actionPending || !actionInput.trim() || waitingForRoll} className="shrink-0 h-10 w-10 p-0 bg-primary hover:bg-primary/80">
+                        <Send className="w-4 h-4" />
+                      </Button>
+                    </form>
+                  )}
+                  {!isHumanDm && !awaitingDm && (
+                    <p className="text-center mt-1.5 text-xs font-sans italic text-muted-foreground/60">
+                      {waitingForRoll ? "The DM awaits your dice roll above." : isHumanDmCampaign ? "Describe your actions. The Dungeon Master will respond." : "Describe your actions. The Dungeon Master determines fate."}
+                    </p>
+                  )}
                 </div>
 
               </>

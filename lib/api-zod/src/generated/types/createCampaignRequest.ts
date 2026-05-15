@@ -5,6 +5,7 @@
  * D&D Text Game API
  * OpenAPI spec version: 0.1.0
  */
+import type { CreateCampaignRequestDmType } from "./createCampaignRequestDmType";
 
 export interface CreateCampaignRequest {
   title: string;
@@ -13,4 +14,6 @@ export interface CreateCampaignRequest {
   isPublic: boolean;
   creatorId: number;
   inviteCode?: string;
+  dmType?: CreateCampaignRequestDmType;
+  humanDmId?: number;
 }

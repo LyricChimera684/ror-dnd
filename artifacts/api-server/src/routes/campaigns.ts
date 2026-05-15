@@ -57,6 +57,8 @@ router.post("/campaigns", async (req, res) => {
       isPublic: body.isPublic,
       creatorId: body.creatorId,
       inviteCode: body.inviteCode ?? null,
+      dmType: (body.dmType as "ai" | "player") ?? "ai",
+      humanDmId: body.humanDmId ?? null,
     })
     .returning();
 

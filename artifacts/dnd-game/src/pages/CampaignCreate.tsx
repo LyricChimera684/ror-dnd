@@ -19,6 +19,8 @@ import {
   Anchor,
   ChevronLeft,
   Check,
+  Bot,
+  User,
 } from "lucide-react";
 
 // ─── Preset Definitions ──────────────────────────────────────────────────────
@@ -180,6 +182,62 @@ const PRESETS: CampaignPreset[] = [
   },
 ];
 
+// ─── DM Type Picker ───────────────────────────────────────────────────────────
+
+function DmTypePicker({ onSelect }: { onSelect: (type: "ai" | "player") => void }) {
+  return (
+    <motion.div
+      key="dmtype"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="max-w-2xl mx-auto"
+    >
+      <div className="bg-card/90 backdrop-blur-md border-ornate p-5 sm:p-8 md:p-10 shadow-2xl text-center">
+        <h1 className="text-3xl sm:text-4xl text-primary mb-2">Who Runs the Table?</h1>
+        <p className="font-sans text-muted-foreground italic mb-8 text-sm sm:text-base">
+          Choose who will narrate and control the world.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => onSelect("ai")}
+            className="group flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-8 bg-primary/10 border border-border hover:border-primary/60 hover:bg-primary/20 transition-all duration-300 cursor-pointer text-left rounded-xl"
+          >
+            <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border border-primary/40 bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors rounded-xl">
+              <Bot className="w-6 h-6 sm:w-8 sm:h-8" />
+            </div>
+            <div>
+              <div className="font-display text-lg sm:text-xl text-primary mb-1">AI Dungeon Master</div>
+              <div className="font-sans text-xs sm:text-sm text-muted-foreground">
+                A powerful AI narrates every scene, rolls dice, and reacts to your choices in real time.
+              </div>
+            </div>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => onSelect("player")}
+            className="group flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-8 bg-primary/10 border border-border hover:border-primary/60 hover:bg-primary/20 transition-all duration-300 cursor-pointer text-left rounded-xl"
+          >
+            <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border border-primary/40 bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors rounded-xl">
+              <User className="w-6 h-6 sm:w-8 sm:h-8" />
+            </div>
+            <div>
+              <div className="font-display text-lg sm:text-xl text-primary mb-1">Player-Hosted DM</div>
+              <div className="font-sans text-xs sm:text-sm text-muted-foreground">
+                You take the DM's seat. Narrate the world, respond to your players, and shape every twist.
+              </div>
+            </div>
+          </motion.button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // ─── Mode Picker ──────────────────────────────────────────────────────────────
 
 function ModePicker({ onSelect }: { onSelect: (mode: "preset" | "diy" | "synopsis") => void }) {
@@ -340,9 +398,11 @@ function PresetGallery({
 
 function CampaignForm({
   preset,
+  dmType,
   onBack,
 }: {
   preset: CampaignPreset | null;
+  dmType: "ai" | "player";
   onBack: () => void;
 }) {
   const user = auth.getUser();
@@ -381,6 +441,8 @@ function CampaignForm({
         setting,
         isPublic,
         creatorId: user.id,
+        dmType,
+        ...(dmType === "player" ? { humanDmId: user.id } : {}),
         ...(!isPublic ? { inviteCode } : {}),
       },
     });
@@ -541,11 +603,17 @@ function CampaignForm({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-type Step = "mode" | "gallery" | "form";
+type Step = "dmtype" | "mode" | "gallery" | "form";
 
 export default function CampaignCreate() {
-  const [step, setStep] = useState<Step>("mode");
+  const [step, setStep] = useState<Step>("dmtype");
   const [selectedPreset, setSelectedPreset] = useState<CampaignPreset | null>(null);
+  const [dmType, setDmType] = useState<"ai" | "player">("ai");
+
+  const handleDmTypeSelect = (type: "ai" | "player") => {
+    setDmType(type);
+    setStep("mode");
+  };
 
   const handleModeSelect = (mode: "preset" | "diy") => {
     if (mode === "preset") {
@@ -564,14 +632,19 @@ export default function CampaignCreate() {
   const handleBack = () => {
     if (step === "form" && selectedPreset) {
       setStep("gallery");
-    } else {
+    } else if (step === "gallery" || step === "form") {
       setStep("mode");
+    } else {
+      setStep("dmtype");
     }
   };
 
   return (
     <AppLayout>
       <AnimatePresence mode="wait">
+        {step === "dmtype" && (
+          <DmTypePicker key="dmtype" onSelect={handleDmTypeSelect} />
+        )}
         {step === "mode" && (
           <ModePicker key="mode" onSelect={handleModeSelect} />
         )}
@@ -579,7 +652,7 @@ export default function CampaignCreate() {
           <PresetGallery key="gallery" onSelect={handlePresetSelect} onBack={handleBack} />
         )}
         {step === "form" && (
-          <CampaignForm key="form" preset={selectedPreset} onBack={handleBack} />
+          <CampaignForm key="form" preset={selectedPreset} dmType={dmType} onBack={handleBack} />
         )}
       </AnimatePresence>
     </AppLayout>

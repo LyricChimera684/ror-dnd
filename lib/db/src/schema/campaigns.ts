@@ -11,6 +11,8 @@ export const campaignsTable = pgTable("campaigns", {
   isPublic: boolean("is_public").default(true).notNull(),
   creatorId: integer("creator_id").notNull().references(() => playersTable.id),
   inviteCode: text("invite_code"),
+  dmType: text("dm_type").default("ai").notNull(),
+  humanDmId: integer("human_dm_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

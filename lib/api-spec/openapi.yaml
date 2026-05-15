@@ -764,6 +764,11 @@ components:
           type: integer
         inviteCode:
           type: string
+        dmType:
+          type: string
+          enum: [ai, player]
+        humanDmId:
+          type: integer
       required: [title, description, setting, isPublic, creatorId]
 
     Campaign:
@@ -783,10 +788,15 @@ components:
           type: integer
         inviteCode:
           type: string
+        dmType:
+          type: string
+          enum: [ai, player]
+        humanDmId:
+          type: integer
         createdAt:
           type: string
           format: date-time
-      required: [id, title, description, setting, isPublic, creatorId, createdAt]
+      required: [id, title, description, setting, isPublic, creatorId, dmType, createdAt]
 
     JoinCampaignRequest:
       type: object
@@ -887,6 +897,11 @@ components:
           type: string
         characterId:
           type: integer
+        playerId:
+          type: integer
+        isDmNarration:
+          type: boolean
+          description: When true, the message is human-DM narration and is stored directly without AI.
         diceRoll:
           type: object
           description: When present, the server performs a trusted dice roll using this notation and ignores the action text.
@@ -912,6 +927,9 @@ components:
           type: string
         isDead:
           type: boolean
+        awaitingDm:
+          type: boolean
+          description: True when the campaign uses a human DM and the DM has not yet responded.
         newAchievements:
           type: array
           items:

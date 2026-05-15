@@ -333,24 +333,33 @@ router.post("/campaigns/:campaignId/join", async (req, res) => {
     .values({ campaignId, playerId: body.playerId, characterId: body.characterId })
     .returning();
 
-  const introPrompt = `You are a Dungeon Master for a D&D text adventure. Be BRIEF — 2 short sentences max.
+  if (campaign.dmType === "player") {
+    // Human DM campaign — skip AI intro; DM will set the scene manually
+    await db.insert(gameMessagesTable).values({
+      sessionId: session.id,
+      role: "assistant",
+      content: `⚔️ **${campaign.title}** begins. The Dungeon Master will set the opening scene.`,
+    });
+  } else {
+    const introPrompt = `You are a Dungeon Master for a D&D text adventure. Be BRIEF — 2 short sentences max.
 Campaign: "${campaign.title}" — ${campaign.description}
 Setting: ${campaign.setting}
 This is a MULTIPLAYER campaign. Opening character: ${character.name}, a ${character.race} ${character.class}.
 
 Set the opening scene in 1-2 sentences. Include a [LOCATION:Name] tag.`;
 
-  const introResponse = await groq.chat.completions.create({
-    model: "compound-beta",
-    messages: [{ role: "user", content: introPrompt }],
-    max_tokens: 200,
-  });
+    const introResponse = await groq.chat.completions.create({
+      model: "compound-beta",
+      messages: [{ role: "user", content: introPrompt }],
+      max_tokens: 200,
+    });
 
-  const introRaw = introResponse.choices[0].message.content ?? "Your adventure begins...";
-  const introNarrative = introRaw.replace(/\[LOCATION:[^\]]+\]/g, "").trim();
+    const introRaw = introResponse.choices[0].message.content ?? "Your adventure begins...";
+    const introNarrative = introRaw.replace(/\[LOCATION:[^\]]+\]/g, "").trim();
 
-  await db.insert(gameMessagesTable).values({ sessionId: session.id, role: "assistant", content: introNarrative });
-  await updateWorldMap(session.id, introRaw);
+    await db.insert(gameMessagesTable).values({ sessionId: session.id, role: "assistant", content: introNarrative });
+    await updateWorldMap(session.id, introRaw);
+  }
 
   res.json(session);
 });
@@ -429,6 +438,40 @@ router.post("/sessions/:sessionId/action", async (req, res) => {
   const effectiveLevel = campaignMember?.campaignLevel ?? character?.level ?? 1;
   const effectiveXp = campaignMember?.campaignXp ?? character?.xp ?? 0;
   const effectiveIsDead = campaignMember?.campaignIsDead ?? character?.isDead ?? false;
+
+  const isHumanDmCampaign = campaign?.dmType === "player";
+  const isHumanDmActing = isHumanDmCampaign && body.playerId != null && campaign?.humanDmId === body.playerId;
+
+  // Human DM narration — store directly as assistant, skip AI
+  if (isHumanDmActing && body.isDmNarration) {
+    const dmContent = body.action.trim() || "(DM narrates...)";
+    await db.insert(gameMessagesTable).values({ sessionId, role: "assistant", content: dmContent });
+
+    // Parse optional stat JSON from DM narration e.g. {"xp":10,"hp":-5}
+    const jsonMatch = dmContent.match(/\{"xp":\d+,"hp":-?\d+\}/);
+    let xpGained = 0;
+    let hpChange = 0;
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[0]);
+        xpGained = parsed.xp ?? 0;
+        hpChange = parsed.hp ?? 0;
+      } catch { /* keep 0 */ }
+    }
+    const displayNarrative = dmContent.replace(/\{"xp":\d+,"hp":-?\d+\}/g, "").trim();
+
+    await Promise.all([updateNpcs(sessionId, dmContent), updateWorldMap(sessionId, dmContent)]);
+
+    res.json({
+      narrative: displayNarrative,
+      sessionId,
+      xpGained,
+      hpChange,
+      newAchievements: [],
+      newItems: [],
+    });
+    return;
+  }
 
   if (effectiveIsDead) {
     res.json({
@@ -516,6 +559,20 @@ LENGTH: 3-4 sentences maximum. No flowery prose, no compliments, just story.`;
   // Store the action prefixed with the character's name so all players can see who acted
   const prefixedAction = `**${character?.name ?? "Adventurer"}**: ${body.action}`;
   await db.insert(gameMessagesTable).values({ sessionId, role: "user", content: prefixedAction });
+
+  // Human-DM campaign — player acted, now waiting for DM to narrate. Skip AI.
+  if (isHumanDmCampaign) {
+    res.json({
+      narrative: "",
+      sessionId,
+      awaitingDm: true,
+      xpGained: 0,
+      hpChange: 0,
+      newAchievements: [],
+      newItems: [],
+    });
+    return;
+  }
 
   // Cap history to last 20 messages to limit token usage as sessions grow
   const recentHistory = history.slice(-20);

@@ -87,6 +87,14 @@ export interface Achievement {
   unlockedAt: string;
 }
 
+export type CreateCampaignRequestDmType =
+  (typeof CreateCampaignRequestDmType)[keyof typeof CreateCampaignRequestDmType];
+
+export const CreateCampaignRequestDmType = {
+  ai: "ai",
+  player: "player",
+} as const;
+
 export interface CreateCampaignRequest {
   title: string;
   description: string;
@@ -94,7 +102,17 @@ export interface CreateCampaignRequest {
   isPublic: boolean;
   creatorId: number;
   inviteCode?: string;
+  dmType?: CreateCampaignRequestDmType;
+  humanDmId?: number;
 }
+
+export type CampaignDmType =
+  (typeof CampaignDmType)[keyof typeof CampaignDmType];
+
+export const CampaignDmType = {
+  ai: "ai",
+  player: "player",
+} as const;
 
 export interface Campaign {
   id: number;
@@ -104,6 +122,8 @@ export interface Campaign {
   isPublic: boolean;
   creatorId: number;
   inviteCode?: string;
+  dmType: CampaignDmType;
+  humanDmId?: number;
   createdAt: string;
 }
 
@@ -166,6 +186,9 @@ export type GameActionRequestDiceRoll = {
 export interface GameActionRequest {
   action: string;
   characterId?: number;
+  playerId?: number;
+  /** When true, the message is human-DM narration and is stored directly without AI. */
+  isDmNarration?: boolean;
   /** When present, the server performs a trusted dice roll using this notation and ignores the action text. */
   diceRoll?: GameActionRequestDiceRoll;
 }
@@ -177,6 +200,8 @@ export interface GameActionResponse {
   hpChange?: number;
   diceRequest?: string;
   isDead?: boolean;
+  /** True when the campaign uses a human DM and the DM has not yet responded. */
+  awaitingDm?: boolean;
   newAchievements?: Achievement[];
   newItems?: InventoryItem[];
   newLocation?: string;

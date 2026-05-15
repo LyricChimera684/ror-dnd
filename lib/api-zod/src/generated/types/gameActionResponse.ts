@@ -15,6 +15,8 @@ export interface GameActionResponse {
   hpChange?: number;
   diceRequest?: string;
   isDead?: boolean;
+  /** True when the campaign uses a human DM and the DM has not yet responded. */
+  awaitingDm?: boolean;
   newAchievements?: Achievement[];
   newItems?: InventoryItem[];
   newLocation?: string;

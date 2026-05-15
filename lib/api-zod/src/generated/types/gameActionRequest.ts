@@ -10,6 +10,9 @@ import type { GameActionRequestDiceRoll } from "./gameActionRequestDiceRoll";
 export interface GameActionRequest {
   action: string;
   characterId?: number;
+  playerId?: number;
+  /** When true, the message is human-DM narration and is stored directly without AI. */
+  isDmNarration?: boolean;
   /** When present, the server performs a trusted dice roll using this notation and ignores the action text. */
   diceRoll?: GameActionRequestDiceRoll;
 }
