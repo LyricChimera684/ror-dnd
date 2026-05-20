@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: dnd-api
+    runtime: node
+    rootDir: .
+    buildCommand: pnpm install --no-frozen-lockfile && pnpm run build
+    startCommand: node artifacts/api-server/dist/index.cjs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false   # set manually in Render dashboard
+      - key: CLERK_SECRET_KEY
+        sync: false   # set manually in Render dashboard
+      - key: FRONTEND_URL
+        sync: false   # set to your Vercel URL, e.g. https://your-app.vercel.app
+      - key: GROQ_API_KEY
+        sync: false   # set manually if you use Groq
